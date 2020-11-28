@@ -11,7 +11,7 @@ from cortix import Cortix
 from cortix import Network
 
 from reactor import SMPWR
-from steamer1 import Steamer
+from steamer import Steamer
 from turbine import Turbine
 from condenser import Condenser
 from water_heater import WaterHeater
@@ -23,7 +23,7 @@ def main():
     make_run   = True
 
     # Preamble
-    end_time = 18.0*unit.minute
+    end_time = 1320*unit.second
     time_step = 30*unit.second
     show_time = (True, 5*unit.minute)
 

@@ -22,7 +22,7 @@ import numpy as np
 import unit
 
 from iapws import IAPWS97 as steam_table
-
+from iapws import iapws97 as ST
 from cortix import Module
 from cortix.support.phase_new import PhaseNew as Phase
 from cortix import Quantity
@@ -76,7 +76,7 @@ class Steamer(Module):
 
         self.iconel690_k = 12.1*unit.watt/unit.meter/unit.kelvin
 
-        self.primary_volume = 1.0*16.35*unit.meter**3
+        self.primary_volume = 1.4*16.35*unit.meter**3
 
         self.secondary_volume = math.pi * self.helicoil_inner_radius**2 * \
                                 self.helicoil_length * self.n_helicoil_tubes
@@ -320,7 +320,7 @@ class Steamer(Module):
 
         temp_s = u_vec[1] # get temperature of secondary outflow
         #print('secondary outflow temp [K] =', temp_s)
-
+        vol_s = self.secondary_volume
         # initialize f_vec to zero
         f_tmp = np.zeros(2, dtype=np.float64) # vector for f_vec return
 
@@ -339,7 +339,6 @@ class Steamer(Module):
 
         rho_p = water_p.rho
         cp_p = water_p.cp * unit.kj/unit.kg/unit.K
-
         vol_p = self.primary_volume
         q_p = self.primary_inflow_mass_flowrate/rho_p
         tau_p = vol_p/q_p
@@ -353,30 +352,47 @@ class Steamer(Module):
 
         press_s = self.secondary_inflow_pressure
         #print('secondary inflow P [bar] =', press_s/unit.bar)
-
-        #print('secondary P [bar] =', press_s/unit.bar)
-        #print('secondary T [K]   =', temp_s)
-
-        water_s = steam_table(T=temp_s, P=press_s/unit.mega/unit.pascal)
-
-        if water_s.phase == 'Two phases':
-            qual = water_s.x
+        
+        t_s_sat = ST._TSat_P(press_s/unit.mega/unit.pascal)
+        h_l = ST._Region1(t_s_sat,press_s/unit.mega/unit.pascal)['h']
+        h_v = ST._Region2(t_s_sat,press_s/unit.mega/unit.pascal)['h']
+        water_sat = steam_table(T=t_s_sat, P=press_s/unit.mega/unit.pascal)
+        q_s = self.secondary_inflow_mass_flowrate/water_sat.rho
+        tau_s = vol_s/q_s
+        
+        q_vap = (h_v - h_l)*self.secondary_inflow_mass_flowrate*tau_s*1000
+        q_p = (temp_p_in-temp_p)*cp_p*self.primary_inflow_mass_flowrate*tau_p 
+        q_sec = (t_s_sat-temp_s_in)*water_sat.cp*self.secondary_inflow_mass_flowrate*tau_s*1000
+        q_act = q_p - q_sec
+        print(time)
+        print(q_act,q_vap)
+        print(q_p, q_sec)
+        #if water_s.phase == 'Two phases':
+        if temp_s > t_s_sat and q_act < q_vap:
+            #t_v_sat = ST._Region4(press_s/unit.mega/unit.pascal,1)
+            qual = 1-(q_vap-q_act)/q_vap
+            print(qual)
+            if qual < 0:
+                qual = .001
+            print(qual)
+            water_s = steam_table(P=press_s/unit.mega/unit.pascal, x=qual)
             rho_s = (1-qual)*water_s.Liquid.rho + qual*water_s.Vapor.rho
             cp_s = (1-qual)*water_s.Liquid.cp + qual*water_s.Vapor.cp
         else:
+            water_s = steam_table(T=temp_s, P=press_s/unit.mega/unit.pascal)
             rho_s = water_s.rho
             cp_s = water_s.cp
-
         cp_s *= unit.kj/unit.kg/unit.K
 
-        vol_s = self.secondary_volume
-        q_s = self.secondary_inflow_mass_flowrate/rho_s
-        tau_s = vol_s/q_s
+        #vol_s = self.secondary_volume
+        #q_s = self.secondary_inflow_mass_flowrate/rho_s
+        #tau_s = vol_s/q_s
 
         #-----------------------
         # calculations
         #-----------------------
         heat_sink = self.__heat_sink_rate(water_p, water_s)
+        print(heat_sink)
 
         f_tmp[0] = - 1/tau_p * (temp_p - temp_p_in) + 1./rho_p/cp_p/vol_p * heat_sink
 
@@ -385,7 +401,6 @@ class Steamer(Module):
         f_tmp[1] = - 1/tau_s * (temp_s - temp_s_in) + 1./rho_s/cp_s/vol_s * heat_source
 
         temp_s_out = f_tmp[1]
-
         return f_tmp
 
     def __heat_sink_rate(self, water_p, water_s):
