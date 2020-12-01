@@ -40,7 +40,7 @@ def main():
     reactor.end_time = end_time
     reactor.show_time = show_time
 
-    #plant_net.module(reactor)  # Add reactor module to network
+    plant_net.module(reactor)  # Add reactor module to network
 
     # Steamer
 
