@@ -25,4 +25,5 @@ References:
  + [Eng-4350: Nuclear Reactor Engineering: course notes](https://github.com/dpploy/engy-4350)
  + [IAPWS 97 Standards](http://www.iapws.org/relguide/IF97-Rev.html)
  + [IAPWS PyPi Library](https://pypi.org/project/iapws/)
+ + [NuScale 720 Application Documents] (https://www.nrc.gov/reactors/new-reactors/smr/nuscale/documents.html)
 
