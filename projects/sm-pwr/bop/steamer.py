@@ -6,10 +6,12 @@
    Helical coil system steam generator for NuScale BOP.
    Once-through heat exchanger to operate under fully developed nucleate boiling
    heat transfer. Subcooled? or Saturated? regime??
+
    + 1012 tubes (Iconel 690)
    + 16 mm OD
    + 0.9 mm tube wall
    + 22.3 m long
+
 """
 import logging
 
@@ -27,17 +29,21 @@ from cortix import Quantity
 
 class Steamer(Module):
     """Steam generator.
+
     Notes
     -----
     These are the `port` names available in this module to connect to respective
     modules: reactor, turbine.
     See instance attribute `port_names_expected`.
+
     """
 
     def __init__(self):
         """Constructor.
+
         Parameters
         ----------
+
         """
 
         super().__init__()
@@ -427,11 +433,14 @@ class Steamer(Module):
     
     def __heat_sink_rate(self, water_p, water_s):
         """Cooling rate of the primary side.
+
            Assumptions
            -----------
+
            + primary side: overall single phase heat tranfer. Locally there may be
              either partial nucleate boiling or fully developed nucleate boiling
              but the model will not capture this.
+
            + secondary side: overall ranging from one phase heat tranfer to fully
              developed nucleate boiling .
         """
@@ -580,8 +589,10 @@ class Steamer(Module):
            Handbook of Single-Phase Convective Heat Transfer, Chap 6.
            S. Kakac, R. Shah, and W. Aung Eds.
            J. Wiley & Sons, New York 1987
+
            Parameters
            ----------
+
            rey: float
                Reynolds number based on diameter
            prtl: float
