@@ -40,7 +40,7 @@ def main():
     reactor.end_time = end_time
     reactor.show_time = show_time
 
-    #plant_net.module(reactor)  # Add reactor module to network
+    plant_net.module(reactor)  # Add reactor module to network
 
     # Steamer
 
@@ -92,8 +92,8 @@ def main():
 
     # Balance of Plant Network Connectivity
 
-    #plant_net.connect([reactor, 'coolant-outflow'], [steamer, 'primary-inflow'])
-    #plant_net.connect([steamer, 'primary-outflow'], [reactor, 'coolant-inflow'])
+    plant_net.connect([reactor, 'coolant-outflow'], [steamer, 'primary-inflow'])
+    plant_net.connect([steamer, 'primary-outflow'], [reactor, 'coolant-inflow'])
     #plant_net.connect([steamer, 'secondary-outflow'], [turbine, 'inflow'])
     #plant_net.connect([turbine, 'outflow'], [condenser, 'inflow'])
     #plant_net.connect([turbine, 'process-heat'], [water_heater, 'heat'])
@@ -109,7 +109,7 @@ def main():
     # Plots
     if make_plots and plant.use_multiprocessing or plant.rank == 0:
 
-        '''
+      
         # Reactor plots
         reactor = plant_net.modules[0]
 
@@ -204,12 +204,12 @@ def main():
                    y_label=quant.latex_name+r' ['+quant.unit+']')
         plt.grid()
         plt.savefig('reactor-coolant-outflow-quality.png', dpi=300)
-        '''
+        
 
 
-        # Steamer plots
-        steamer = plant_net.modules[0]
-        #steamer = plant_net.modules[1]
+        #Steamer plots
+        #steamer = plant_net.modules[0]
+        steamer = plant_net.modules[1]
 
         (quant, time_unit) = steamer.primary_outflow_phase.get_quantity_history('temp')
 
@@ -224,7 +224,7 @@ def main():
                    y_label=quant.latex_name+' [C]')
         plt.grid()
         plt.savefig('steamer-secondary-outflow-temp.png', dpi=300)
-
+        
         '''
         # Turbine plots
         turbine = plant_net.modules[2]
