@@ -23,7 +23,7 @@ def main():
     make_run   = True
 
     # Preamble
-    end_time = 5*unit.minute
+    end_time = 8*unit.minute
     time_step = 2.5*unit.second
     show_time = (True, 5*unit.minute)
 
@@ -40,7 +40,7 @@ def main():
     reactor.end_time = end_time
     reactor.show_time = show_time
 
-    #plant_net.module(reactor)  # Add reactor module to network
+    plant_net.module(reactor)  # Add reactor module to network
 
     # Steamer
 
@@ -64,7 +64,7 @@ def main():
     turbine.end_time = end_time
     turbine.show_time = show_time
 
-    #plant_net.module(turbine)  # Add steamer module to network
+    plant_net.module(turbine)  # Add steamer module to network
 
     '''Condenser'''
 
@@ -92,9 +92,9 @@ def main():
 
     # Balance of Plant Network Connectivity
 
-    #plant_net.connect([reactor, 'coolant-outflow'], [steamer, 'primary-inflow'])
-    #plant_net.connect([steamer, 'primary-outflow'], [reactor, 'coolant-inflow'])
-    #plant_net.connect([steamer, 'secondary-outflow'], [turbine, 'inflow'])
+    plant_net.connect([reactor, 'coolant-outflow'], [steamer, 'primary-inflow'])
+    plant_net.connect([steamer, 'primary-outflow'], [reactor, 'coolant-inflow'])
+    plant_net.connect([steamer, 'secondary-outflow'], [turbine, 'inflow'])
     #plant_net.connect([turbine, 'outflow'], [condenser, 'inflow'])
     #plant_net.connect([turbine, 'process-heat'], [water_heater, 'heat'])
     #plant_net.connect([condenser, 'outflow'], [water_heater, 'inflow'])
@@ -208,7 +208,7 @@ def main():
 
 
         # Steamer plots
-        steamer = plant_net.modules[0]
+        steamer = plant_net.modules[1]
         #steamer = plant_net.modules[1]
         print('here')
         (quant, time_unit) = steamer.primary_outflow_phase.get_quantity_history('temp')

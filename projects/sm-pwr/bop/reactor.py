@@ -111,7 +111,7 @@ class SMPWR(Module):
         self.fuel_volume = 0.841*unit.meter**3
 
         self.coolant_mass_flowrate_ss = 4.66e6*unit.lb/unit.hour
-        self.flowrate_relaxation = 5*unit.minute
+        self.flowrate_relaxation = 1*unit.minute
 
         self.coolant_pressure = 1850*unit.psi  # altered by coolant-inflow port
 
@@ -486,7 +486,6 @@ class SMPWR(Module):
 
         self.reactor_phase.set_value('tau', tau, time)
         print('Time',time)
-        print('Mass flow', mass_flowrate)
         return time
 
     def __get_state_vector(self, time):
@@ -625,7 +624,7 @@ class SMPWR(Module):
         c_vec = u_vec[1:-3] # get delayed neutron emitter concentration
 
         mass_flowrate = u_vec[-3]
-
+        print('mass_flowrate', mass_flowrate)
         temp_f = u_vec[-2] # get temperature of fuel
 
         temp_c = u_vec[-1] # get temperature of coolant
@@ -809,7 +808,7 @@ class SMPWR(Module):
 
         # Heating power (W)
         q_p = - UA * (temp_f - temp_c)
-
+        print('core heat', q_p*1e-6)
         return (q_p, nusselt_c)
 
     def __mean_nusselt_single_phase(self, rey, prtl):

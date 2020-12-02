@@ -18,7 +18,11 @@
          - Max: 5.24e6
          - Min: 4.27e6
    + Secondary inflow temperature: 149 C
-
+   + voume of the steam generator region: 621 ft^3
+   + primary side volume = 10.99 m^3
+   + volume secondary side = 4.66 m^3
+   + steam generator heat transfer area 17928 ft^2
+   + heat flux rate is 8.4066 BTU/ft^2-s
 """
 import logging
 
@@ -83,11 +87,11 @@ class Steamer(Module):
 
         self.iconel690_k = 12.1*unit.watt/unit.meter/unit.kelvin
 
-        self.primary_volume = 16.35*unit.meter**3
-
-        self.secondary_volume = math.pi * self.helicoil_inner_radius**2 * \
-                                self.helicoil_length * self.n_helicoil_tubes
-
+        #self.primary_volume = 16.35*unit.meter**3
+        self.primary_volume = 10.99*unit.meter**3
+        #self.secondary_volume = math.pi * self.helicoil_inner_radius**2 * \
+        #                        self.helicoil_length * self.n_helicoil_tubes
+        self.secondary_volume = 4.66*unit.meter**3
        # Initialization
         self.primary_inflow_temp = (283.9+273.15)*unit.kelvin
         self.primary_inflow_pressure = 127.6*unit.bar
@@ -566,7 +570,7 @@ class Steamer(Module):
         therm_cond_wall = self.iconel690_k
 
         fouling = 0.0003 * unit.F*unit.ft**2*unit.hour/unit.Btu
-
+        '''
         # Secondary side based heat transfer resistance
         if h_s > 0:
             one_over_U = 1.0/h_p * area_outer/area_inner + \
@@ -577,14 +581,15 @@ class Steamer(Module):
             one_over_U = 1.0/h_p * area_outer/area_inner + \
             (radius_outer-radius_inner)/therm_cond_wall * area_outer/area_mean + \
             fouling
-
+        '''
+        one_over_U = 1477.9
         # Total area of heat tranfer
-        area = 2*math.pi*radius_mean* self.n_helicoil_tubes * self.helicoil_length
-
+        #area = 2*math.pi*radius_mean* self.n_helicoil_tubes * self.helicoil_length
+        area = 1665.57*unit.meter**2    
         temp_p_avg = (self.primary_inflow_temp + temp_p)/2
         temp_s_avg = (self.secondary_inflow_temp + temp_s)/2
-        q_p = - area * 1/one_over_U * (temp_p_avg-temp_s_avg)
-
+        q_p = - area * one_over_U * (temp_p_avg-temp_s_avg)
+        #print(q_p*1e-6)
         return q_p
 
     def __mean_nusselt_single_phase(self, rey, prtl, prtl_w, st_sl):
