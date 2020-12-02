@@ -97,9 +97,9 @@ class Steamer(Module):
         self.primary_outflow_pressure = 190*unit.bar
         self.primary_outflow_mass_flowrate = self.primary_inflow_mass_flowrate
 
-        self.secondary_inflow_temp = self.primary_outflow_temp-\
-                self.wall_temp_delta_primary - self.wall_temp_delta_secondary
-
+        #self.secondary_inflow_temp = self.primary_outflow_temp-\
+         #       self.wall_temp_delta_primary - self.wall_temp_delta_secondary
+        self.secondary_inflow_temp = 300
         self.secondary_inflow_pressure = 34*unit.bar
         self.secondary_inflow_mass_flowrate = 67*unit.kg/unit.second
 
@@ -342,7 +342,7 @@ class Steamer(Module):
         #-----------------------
 
         temp_p_in = self.primary_inflow_temp
-        print('primary inflow temp [K] =', temp_p_in)
+        #print('primary inflow temp [K] =', temp_p_in)
         #print('secondary inflow temp [K] =', self.secondary_inflow_temp)
 
         press_p = self.primary_inflow_pressure
@@ -374,10 +374,11 @@ class Steamer(Module):
         #print('secondary inflow P [bar] =', press_s/unit.bar)
 
         #print('secondary P [bar] =', press_s/unit.bar)
-        print('Primary   T [K]   =', temp_p)
-        print('Secondary T [K]   =', temp_s)
-        print('quality = ', self.secondary_outflow_quality)
-
+        #print('Primary   T [K]   =', temp_p)
+        #print('Secondary T [K]   =', temp_s)
+        #print('quality = ', self.secondary_outflow_quality)
+        print('sec temp', temp_s)
+        print('press_s',press_s/unit.mega/unit.pascal)
         water_s = WaterProps(T=temp_s, P=press_s/unit.mega/unit.pascal)
 
         if water_s.phase == 'Liquid':
@@ -434,7 +435,6 @@ class Steamer(Module):
         h_l = sat_liq.h
         h_vap = h_v-h_l
         q_vap = h_vap
-        print('pleaaaaaase', temp_s_in,sat_liq.T)
         if q_total < q_heat: # subcooled
             self.secondary_outflow_quality = 0
         elif q_total > (q_vap+q_heat): #superheated
@@ -510,8 +510,6 @@ class Steamer(Module):
         st = 1.5 * sl # tube bundle pitch transverse to flow
 
         temp_p_w = self.primary_inflow_temp - self.wall_temp_delta_primary # wall temperature
-        print('Prinary Wall Temp [K] =',temp_p_w)
-
         water_p_w = WaterProps(T=temp_p_w, P=water_p.P) # primary at wall T, P
 
         assert water_p_w.phase != 'Two phases' # sanity check
@@ -537,12 +535,10 @@ class Steamer(Module):
         #print('primary   pressure [bar] = ',water_p.P*unit.mega*unit.pascal/unit.bar)
 
         #assert temp_s_w >= temp_s, 'temp_s = %r, temp_s_w = %r'%(temp_s,temp_s_w)
-        print('saturated temp = ', temp_s_sat)
 
         if (temp_s_w - temp_s_sat) > 0.0: # nucleate boiling
         # Jens and Lottes correlation for subcooled/saturated nucleate boiling
         # 500 <=  P <= 2000 psi
-            print('MADE HERE')
             q2prime = ((temp_s_w - temp_s_sat)*math.exp((self.secondary_inflow_pressure/unit.mega/unit.pascal) /6.2)/0.79)**4
             h_s = q2prime/(temp_s_w - temp_s_sat)
         else: # single phase transfer

@@ -485,7 +485,8 @@ class SMPWR(Module):
               if q_vol > 0 and time > self.discard_tau_recording_before else 0
 
         self.reactor_phase.set_value('tau', tau, time)
-
+        print('Time',time)
+        print('Mass flow', mass_flowrate)
         return time
 
     def __get_state_vector(self, time):
