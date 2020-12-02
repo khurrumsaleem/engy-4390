@@ -83,13 +83,14 @@ class Steamer(Module):
 
         self.iconel690_k = 12.1*unit.watt/unit.meter/unit.kelvin
 
-        self.primary_volume = 16.35*unit.meter**3
-
-        self.secondary_volume = math.pi * self.helicoil_inner_radius**2 * \
-                                self.helicoil_length * self.n_helicoil_tubes
+        self.primary_volume = 11*unit.meter**3
+        
+        self.secondary_volume = 30
+        #self.secondary_volume = 2*math.pi * self.helicoil_inner_radius**2 * \
+                                #self.helicoil_length * self.n_helicoil_tubes
 
        # Initialization
-        self.primary_inflow_temp = (283.9+273.15)*unit.kelvin
+        self.primary_inflow_temp = (20+273.15)*unit.kelvin
         self.primary_inflow_pressure = 127.6*unit.bar
         self.primary_inflow_mass_flowrate = 600*unit.kg/unit.second
         #self.primary_inflow_mass_flowrate = 0*unit.kg/unit.second
@@ -98,7 +99,7 @@ class Steamer(Module):
         self.primary_outflow_pressure = 190*unit.bar
         self.primary_outflow_mass_flowrate = self.primary_inflow_mass_flowrate
 
-        self.secondary_inflow_temp = (149+273.15)*unit.kelvin
+        self.secondary_inflow_temp = (15+273.15)*unit.kelvin
 
         self.secondary_inflow_pressure = 34*unit.bar
         self.secondary_inflow_mass_flowrate = 67*unit.kg/unit.second
@@ -430,7 +431,6 @@ class Steamer(Module):
         sensible_water = WaterProps(T= (temp_s_in +sat_liq.T)/2 , P=press_s/unit.mega/unit.pascal)
         cp_l_o = sensible_water.cp
         q_total = (temp_s - temp_s_in)*cp_s/1000
-        #q_total = heat_source/1000/self.secondary_inflow_mass_flowrate
         q_heat = (sat_liq.T- temp_s_in)*cp_l_o
         h_v = sat_vap.h
         h_l = sat_liq.h
@@ -507,7 +507,7 @@ class Steamer(Module):
         sl = 1.0      # tube bundle pitch parallel to flow
         st = 1.5 * sl # tube bundle pitch transverse to flow
 
-        temp_p_w = self.primary_inflow_temp - self.wall_temp_delta_primary # wall temperature
+        temp_p_w = (self.primary_inflow_temp+temp_p)/2 - self.wall_temp_delta_primary # wall temperature
         #print('Prinary Wall Temp [K] =',temp_p_w)
 
         water_p_w = WaterProps(T=temp_p_w, P=water_p.P) # primary at wall T, P
@@ -526,7 +526,7 @@ class Steamer(Module):
         radius_inner = self.helicoil_inner_radius
 
         #temp_s_w = temp_p_w - self.wall_temp_delta_secondary
-        temp_s_w = temp_p_w
+        temp_s_w = temp_p_w - self.wall_temp_delta_secondary
 
         water_s_sat = WaterProps(P=water_s.P, x=0.0)
         temp_s_sat = water_s_sat.T
@@ -541,6 +541,7 @@ class Steamer(Module):
         # Jens and Lottes correlation for subcooled/saturated nucleate boiling
         # 500 <=  P <= 2000 psi
             q2prime = ((temp_s_w - temp_s_sat)*math.exp((self.secondary_inflow_pressure/unit.mega/unit.pascal) /6.2)/0.79)**4
+            print(temp_p,temp_s,temp_s_w)
             h_s = q2prime/(temp_s_w - temp_s_sat)
         else: # single phase transfer
             rey_s = self.secondary_inflow_mass_flowrate * 2*radius_inner / mu_s
