@@ -89,12 +89,13 @@ class Steamer(Module):
                                 self.helicoil_length * self.n_helicoil_tubes
 
        # Initialization
-        self.primary_inflow_temp = (283.9+273.15)*unit.kelvin
+        self.primary_inflow_temp = (321+273.15)*unit.kelvin
         self.primary_inflow_pressure = 127.6*unit.bar
         self.primary_inflow_mass_flowrate = 600*unit.kg/unit.second
         #self.primary_inflow_mass_flowrate = 0*unit.kg/unit.second
 
-        self.primary_outflow_temp = self.primary_inflow_temp - 2*unit.K
+        #self.primary_outflow_temp = self.primary_inflow_temp
+        self.primary_outflow_temp = 265+273.15
         self.primary_outflow_pressure = 190*unit.bar
         self.primary_outflow_mass_flowrate = self.primary_inflow_mass_flowrate
 
@@ -103,7 +104,7 @@ class Steamer(Module):
         self.secondary_inflow_pressure = 34*unit.bar
         self.secondary_inflow_mass_flowrate = 67*unit.kg/unit.second
 
-        self.secondary_outflow_temp = self.secondary_inflow_temp - 2*unit.K
+        self.secondary_outflow_temp = 249+273.15
         self.secondary_outflow_pressure = 34*unit.bar
         self.secondary_outflow_mass_flowrate = self.secondary_inflow_mass_flowrate
 
@@ -409,13 +410,13 @@ class Steamer(Module):
         #assert heat_sink_pwr < 0, 'heatsink =  %r'%(heat_sink_pwr)
         #assert temp_p-temp_p_in < 0
 
-        f_tmp[0] = - 1/tau_p * (temp_p - temp_p_in) +  heat_sink_pwr_dens/(rho_p*cp_p)
+        f_tmp[0] = - 1/tau_p * (temp_p - temp_p_in) -  heat_sink_pwr_dens/(rho_p*cp_p)
 
         heat_source_pwr = - heat_sink_pwr
         heat_source_pwr_dens = heat_source_pwr/vol_s
 
         #assert temp_s-temp_s_in < 0
-        f_tmp[1] = - 1/tau_s * (temp_s - temp_s_in) + heat_source_pwr/(rho_s*cp_s)
+        f_tmp[1] = - 1/tau_s * (temp_s - temp_s_in) - heat_source_pwr/(rho_s*cp_s)
 
         #print('Primary:',f_tmp[0], 'Convective = ', - 1/tau_p * (temp_p - temp_p_in), 'heat term = ', heat_sink, 'mass*cp = ' ,(rho_p*cp_p*vol_p) )
         #print('Secondary:',f_tmp[1], 'Convective = ', - 1/tau_s * (temp_s - temp_s_in), 'heat term = ', heat_source ,'mass*cp = ', (rho_s*cp_s*vol_s))
@@ -591,7 +592,9 @@ class Steamer(Module):
         #q_p = - area * 1/one_over_U * (delta_t_logmn)
         q_p = - area * 1/one_over_U * (del_t_1-del_t_2)
         #q_p = - area * 1/one_over_U * (del_t_1_test)
-
+        print('heat rate',q_p)
+        print(area,one_over_U,del_t_1,del_t_2)
+        q_p = .25*67*2000*(self.primary_inflow_temp-self.secondary_inflow_temp)
         return q_p
 
     def __mean_nusselt_single_phase(self, rey, prtl, prtl_w, st_sl):
