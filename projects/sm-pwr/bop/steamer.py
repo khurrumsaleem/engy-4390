@@ -24,6 +24,7 @@
    + Full stem flow: 532100 lb/h (67.04 kg/s)
    + Operating secondary temperature: 575 F (301.67 C)
    + Operating secondary pressure: 500 psi (34.47 bar)
+   + total RPV volume 
 
 """
 import logging
@@ -556,13 +557,14 @@ class Steamer(Module):
         h_l = sat_liq.h
         h_vap = h_v-h_l
         q_vap = h_vap
-        if q_total < q_heat: # subcooled
+        
+        if q_total < q_heat: # Subcooled
             self.secondary_outflow_quality = 0
-        elif q_total > (q_vap+q_heat): #superheated
+        elif q_total > (q_vap+q_heat): # Superheated
             self.secondary_outflow_quality = 1
-        else: #mixed
+        else: # Mixed
             self.secondary_outflow_quality = 1- (h_vap - (q_total - q_heat))/h_vap
-
+            
         return f_tmp
 
     def __heat_sink_pwr(self, water_p, water_s):
