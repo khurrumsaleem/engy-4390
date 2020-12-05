@@ -235,8 +235,7 @@ class Turbine(Module):
         print(self.inflow_quality, self.inflow_temp)
 
         # If entering stream is not steam (valve closed scenario)        
-        #if self.inflow_temp < steam_table._TSat_P(p_in_MPa):
-        if self.inflow_quality == 0:
+        if self.inflow_temp < steam_table._TSat_P(p_in_MPa):
             t_runoff = self.inflow_temp
             power = 0
             quality = 0
