@@ -62,6 +62,7 @@ class Turbine(Module):
         self.inflow_temp = 20+273.15 #K
         self.inflow_pressure = 1.0*unit.bar
         self.inflow_mass_flowrate = 67*unit.kg/unit.second
+        self.inflow_quality = 0
 
         self.outflow_temp = 20+272.15 #K
         self.outflow_pressure = self.vent_pressure
@@ -182,6 +183,8 @@ class Turbine(Module):
             self.inflow_temp = inflow['temperature']
             self.inflow_pressure = inflow['pressure']
             self.inflow_mass_flowrate = inflow['mass_flowrate']
+            self.inflow_quality = inflow['quality']
+            
 
         # Interactions in the outflow port
         #-----------------------------------------
@@ -229,9 +232,11 @@ class Turbine(Module):
         # Get state values
         p_in_MPa = self.inflow_pressure/unit.mega/unit.pascal
         p_out_MPa = self.vent_pressure/unit.mega/unit.pascal
+        print(self.inflow_quality, self.inflow_temp)
 
         # If entering stream is not steam (valve closed scenario)        
-        if self.inflow_temp < steam_table._TSat_P(p_in_MPa):
+        #if self.inflow_temp < steam_table._TSat_P(p_in_MPa):
+        if self.inflow_quality == 0:
             t_runoff = self.inflow_temp
             power = 0
             quality = 0
