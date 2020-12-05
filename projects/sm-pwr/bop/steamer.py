@@ -20,6 +20,7 @@
    + Secondary inflow temperature: 149 C
    + Secondary outflow temperature: 584.4 F (306.9 C) (saturated = 241.68 C)
    + Heat transfer area:  17928 ft^2  (1665.57 m^2)
+   + Cylindrical effectiveness: 0.928
    + Heat flux at operating condition: 8.4077 Btu/ft^2-s (95482.27 W/m^2)
    + Full stem flow: 532100 lb/h (67.04 kg/s)
    + Operating secondary temperature: 575 F (301.67 C)
@@ -79,27 +80,30 @@ class Steamer(Module):
         # Configuration parameters
         self.discard_tau_recording_before = 2*unit.minute
         self.heat_transfer_area = 1665.57*unit.meter**2
-
+        self.cylindrical_effectiveness = 0.928
+        
         self.helicoil_outer_radius = 16/2*unit.milli*unit.meter
         self.helicoil_tube_wall = 0.9*unit.milli*unit.meter
         self.helicoil_inner_radius = self.helicoil_outer_radius - self.helicoil_tube_wall
         self.helicoil_length = 22.3*unit.meter
         self.n_helicoil_tubes = 1380
-
+        
         self.wall_temp_delta_primary = 1.5*unit.K
         self.wall_temp_delta_secondary = 1.5*unit.K
 
         self.iconel690_k = 12.1*unit.watt/unit.meter/unit.kelvin
 
-        self.primary_volume = 2.5*unit.meter**3
-
+        
         self.secondary_volume = math.pi * self.helicoil_inner_radius**2 * \
-                                self.helicoil_length * self.n_helicoil_tubes
+                                self.helicoil_length * self.n_helicoil_tubes/ self.cylindrical_effectiveness
+        
+        self.primary_volume = 0.5*self.secondary_volume
+        print(self.secondary_volume, self.primary_volume)
 
        # Initialization
-        self.primary_inflow_temp = (283.9+273.15)*unit.kelvin
+        self.primary_inflow_temp = (320+273.15)*unit.kelvin
         self.primary_pressure = 127.6*unit.bar
-        self.primary_mass_flowrate = 2.5*600*unit.kg/unit.second
+        self.primary_mass_flowrate = 587.15*unit.kg/unit.second
 
         self.primary_outflow_temp = self.primary_inflow_temp #- 2*unit.K
 
@@ -312,10 +316,12 @@ class Steamer(Module):
             temp = self.secondary_outflow_phase.get_value('temp', msg_time)
             press = self.secondary_outflow_phase.get_value('pressure', msg_time)
             flowrate = self.secondary_outflow_phase.get_value('flowrate', msg_time)
+            quality = self.secondary_outflow_phase.get_value('quality', msg_time)
             secondary_outflow = dict()
             secondary_outflow['temperature'] = temp
             secondary_outflow['pressure'] = press
             secondary_outflow['mass_flowrate'] = flowrate
+            secondary_outflow['quality'] = quality
 
             self.send((msg_time, secondary_outflow), 'secondary-outflow')
 
@@ -349,6 +355,7 @@ class Steamer(Module):
         steamer = self.state_phase.get_row(time)
 
         time += self.time_step
+        print(time)
 
         self.primary_outflow_phase.add_row(time, primary_outflow)
         self.primary_outflow_phase.set_value('temp', temp_p, time)

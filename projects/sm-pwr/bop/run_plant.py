@@ -272,7 +272,7 @@ def main():
 
         '''
         # Turbine plots
-        turbine = plant_net.modules[2]
+        turbine = plant_net.modules[1]
 
         (quant, time_unit) = turbine.state_phase.get_quantity_history('power')
 
@@ -280,7 +280,8 @@ def main():
                    y_label=quant.latex_name+' ['+quant.unit+']')
         plt.grid()
         plt.savefig('turbine-power.png', dpi=300)
-
+        '''
+        '''
         # Condenser plots
         condenser = plant_net.modules[3]
 
@@ -301,6 +302,7 @@ def main():
         plt.grid()
         plt.savefig('water_heater-outflow-temp.png', dpi=300)
         '''
+        
 
     plant.close()  # Properly shutdow plant
 
