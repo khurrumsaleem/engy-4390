@@ -340,10 +340,12 @@ class Steamer(Module):
             temp = self.secondary_outflow_phase.get_value('temp', msg_time)
             press = self.secondary_outflow_phase.get_value('pressure', msg_time)
             flowrate = self.secondary_outflow_phase.get_value('flowrate', msg_time)
+            quality = self.secondary_outflow_phase.get_value('quality', msg_time)
             secondary_outflow = dict()
             secondary_outflow['temperature'] = temp
             secondary_outflow['pressure'] = press
             secondary_outflow['mass_flowrate'] = flowrate
+            secondary_outflow['quality'] = quality
 
             self.send((msg_time, secondary_outflow), 'secondary-outflow')
 
