@@ -64,7 +64,7 @@ def main():
     turbine.end_time = end_time
     turbine.show_time = show_time
 
-    #plant_net.module(turbine)  # Add steamer module to network
+    plant_net.module(turbine)  # Add steamer module to network
 
     '''Condenser'''
 
@@ -94,7 +94,7 @@ def main():
 
     plant_net.connect([reactor, 'coolant-outflow'], [steamer, 'primary-inflow'])
     plant_net.connect([steamer, 'primary-outflow'], [reactor, 'coolant-inflow'])
-    #plant_net.connect([steamer, 'secondary-outflow'], [turbine, 'inflow'])
+    plant_net.connect([steamer, 'secondary-outflow'], [turbine, 'inflow'])
     #plant_net.connect([turbine, 'outflow'], [condenser, 'inflow'])
     #plant_net.connect([turbine, 'process-heat'], [water_heater, 'heat'])
     #plant_net.connect([condenser, 'outflow'], [water_heater, 'inflow'])
@@ -267,7 +267,7 @@ def main():
         plt.savefig('steamer-nusselt_s.png', dpi=300)
 
 
-        '''
+        
         # Turbine plots
         turbine = plant_net.modules[2]
 
@@ -277,7 +277,8 @@ def main():
                    y_label=quant.latex_name+' ['+quant.unit+']')
         plt.grid()
         plt.savefig('turbine-power.png', dpi=300)
-
+        '''
+        
         # Condenser plots
         condenser = plant_net.modules[3]
 
