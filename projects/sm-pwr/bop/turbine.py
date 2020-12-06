@@ -214,13 +214,11 @@ class Turbine(Module):
 
             msg_time = self.recv('process-heat')
 
-            temp = self.outflow_phase.get_value('temp', msg_time)
-            outflow = dict()
-            outflow['temperature'] = temp
-            outflow['pressure'] = self.vent_pressure
-            outflow['mass_flowrate'] = self.outflow_mass_flowrate
+            power = self.state_phase.get_value('power', msg_time)
+            process_heat = dict()
+            process_heat['heat'] = power*.01
 
-            self.send((msg_time, outflow), 'process-heat')
+            self.send((msg_time, process_heat), 'process-heat')
 
     def __step(self, time=0.0):
 

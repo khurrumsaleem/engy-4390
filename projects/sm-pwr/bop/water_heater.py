@@ -190,10 +190,10 @@ class WaterHeater(Module):
 
             self.send(time, 'external-heat')
 
-            (check_time, heat) = self.recv('external-heat')
+            (check_time, heat_ext) = self.recv('external-heat')
             assert abs(check_time-time) <= 1e-6
 
-            self.external_heat_source_rate = heat
+            self.external_heat_source_rate = heat_ext['heat']
 
     def __step(self, time=0.0):
 
@@ -270,6 +270,8 @@ class WaterHeater(Module):
         #-----------------------
         # calculations
         #-----------------------
+        print(self.external_heat_source_rate, self.electric_heat_source_rate)
+        
         heat_source_pwr = self.external_heat_source_rate + self.electric_heat_source_rate
         heat_source_pwr_dens = heat_source_pwr/vol
 
