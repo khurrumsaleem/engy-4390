@@ -39,7 +39,7 @@ class WaterHeater(Module):
 
         super().__init__()
 
-        self.port_names_expected = ['inflow', 'outflow', 'heat']
+        self.port_names_expected = ['inflow', 'outflow', 'external-heat']
 
         # General attributes
         self.initial_time = 0.0*unit.second
@@ -55,12 +55,12 @@ class WaterHeater(Module):
 
         # Configuration parameters
 
-        self.volume = 15*unit.meter**3
+        self.volume = 5*unit.meter**3
 
         # Initialization
 
         self.inflow_temp = (20+273)*unit.kelvin
-        self.inflow_pressure = 20*unit.bar
+        self.inflow_pressure = 34*unit.bar
         self.inflow_mass_flowrate = 67*unit.kg/unit.second
 
         self.outflow_temp = (20+273.15)*unit.kelvin
@@ -68,7 +68,9 @@ class WaterHeater(Module):
         self.outflow_pressure = 34*unit.bar
         self.outflow_mass_flowrate = 67*unit.kg/unit.second
 
-        self.heat_source_rate = 0*unit.watt
+        self.electric_heat_source_rate = 25*unit.mega*unit.watt
+
+        self.external_heat_source_rate = 0*unit.watt # external
 
         # Outflow phase history
         quantities = list()
@@ -89,6 +91,14 @@ class WaterHeater(Module):
 
         quantities.append(press)
 
+        flowrate = Quantity(name='flowrate',
+                         formal_name='P', unit='kg/s',
+                         value=self.outflow_mass_flowrate,
+                         latex_name=r'$P$',
+                         info='Water Heater Outflow Mass Flowrate')
+
+        quantities.append(flowrate)
+
         self.outflow_phase = Phase(time_stamp=self.initial_time,
                                    time_unit='s', quantities=quantities)
 
@@ -108,6 +118,12 @@ class WaterHeater(Module):
 
         while time <= self.end_time:
 
+            # Failure scenarios
+            if 10*unit.minute < time < 12*unit.minute:
+                self.inflow_mass_flowrate = 57*unit.kg/unit.second
+            else:
+                self.inflow_mass_flowrate = 67*unit.kg/unit.second
+
             if self.show_time[0] and \
                (print_time <= time < print_time+print_time_step):
 
@@ -120,20 +136,20 @@ class WaterHeater(Module):
             else:
                 self.__logit = False
 
-            # Communicate information
-            #------------------------
-            self.__call_ports(time)
-
             # Evolve one time step
             #---------------------
 
             time = self.__step(time)
 
+            # Communicate information
+            #------------------------
+            self.__call_ports(time)
+
     def __call_ports(self, time):
 
         # Interactions in the feed water outflow port
         #-----------------------------------------
-        # one way "to" steam geneator
+        # one way "to" outflow
 
         # send to
         if self.get_port('outflow').connected_port:
@@ -165,19 +181,19 @@ class WaterHeater(Module):
             self.inflow_pressure = inflow['pressure']
             self.inflow_mass_flowrate = inflow['mass_flowrate']
 
-        # Interactions in the heat port
+        # Interactions in the external-heat port
         #----------------------------------------
-        # one way "from" heat
+        # one way "from" external-heat
 
         # receive from
-        if self.get_port('heat').connected_port:
+        if self.get_port('external-heat').connected_port:
 
-            self.send(time, 'heat')
+            self.send(time, 'external-heat')
 
-            (check_time, heat) = self.recv('heat')
+            (check_time, heat) = self.recv('external-heat')
             assert abs(check_time-time) <= 1e-6
 
-            self.heat_source_rate = heat
+            self.external_heat_source_rate = heat
 
     def __step(self, time=0.0):
 
@@ -211,12 +227,14 @@ class WaterHeater(Module):
         self.outflow_phase.add_row(time, outflow)
         self.outflow_phase.set_value('temp', temp, time)
         self.outflow_phase.set_value('pressure', self.outflow_pressure, time)
+        self.outflow_phase.set_value('flowrate', self.outflow_mass_flowrate, time)
+
+        #print(temp-273.15,self.inflow_temp-273.15)
 
         return time
 
     def __get_state_vector(self, time):
         """Return a numpy array of all unknowns ordered as shown.
-
         """
 
         u_vec = np.empty(0, dtype=np.float64)
@@ -252,8 +270,9 @@ class WaterHeater(Module):
         #-----------------------
         # calculations
         #-----------------------
-        heat_source = self.heat_source_rate
+        heat_source_pwr = self.external_heat_source_rate + self.electric_heat_source_rate
+        heat_source_pwr_dens = heat_source_pwr/vol
 
-        f_tmp[0] = - 1/tau * (temp - temp_in) + 1./rho/cp/vol * heat_source
+        f_tmp[0] = - 1/tau * (temp - temp_in) + 1./rho/cp * heat_source_pwr_dens
 
         return f_tmp

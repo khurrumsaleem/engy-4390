@@ -55,12 +55,14 @@ class Turbine(Module):
         # Too low???
         self.vent_pressure = 0.008066866*unit.mega*unit.pascal
         #self.vent_pressure = 1*unit.bar
-        self.process_heat_fraction = .01 #1%
+
+        self.process_heat_pwr = 25*unit.mega*unit.watt
 
         # Initialization
 
         self.inflow_temp = 20+273.15 #K
-        self.inflow_pressure = 1.0*unit.bar
+        #self.inflow_pressure = 1.0*unit.bar
+        self.inflow_pressure = 34*unit.bar
         self.inflow_mass_flowrate = 67*unit.kg/unit.second
         self.inflow_quality = 0
 
@@ -111,20 +113,20 @@ class Turbine(Module):
         quantities = list()
 
         power = Quantity(name='power',
-                         formal_name='W_s', unit='W_e',
+                         formal_name='W_s', unit='W$_e$',
                          value=0.0,
                          latex_name=r'$W_s$',
                          info='Turbine Power')
 
         quantities.append(power)
 
-        process_heat = Quantity(name='process-heat',
-                         formal_name='W_s', unit='W_e',
+        process_heat_pwr = Quantity(name='process-heat',
+                         formal_name='Q', unit='W',
                          value=0.0,
-                         latex_name=r'$W_s$',
+                         latex_name=r'$Q$',
                          info='Turbine Process Heat Power')
 
-        quantities.append(process_heat)
+        quantities.append(process_heat_pwr)
 
         self.state_phase = Phase(time_stamp=self.initial_time,
                                  time_unit='s', quantities=quantities)
@@ -157,13 +159,13 @@ class Turbine(Module):
             else:
                 self.__logit = False
 
-            # Communicate information
-            #------------------------
-            self.__call_ports(time)
-
             # Evolve one time step
             #---------------------
             time = self.__step(time)
+
+            # Communicate information
+            #------------------------
+            self.__call_ports(time)
 
     def __call_ports(self, time):
 
@@ -207,7 +209,7 @@ class Turbine(Module):
         #-----------------------------------------
         # One way "to" process-heat
 
-        # Send to 
+        # Send to
         if self.get_port('process-heat').connected_port:
 
             msg_time = self.recv('process-heat')
@@ -218,7 +220,7 @@ class Turbine(Module):
             outflow['pressure'] = self.vent_pressure
             outflow['mass_flowrate'] = self.outflow_mass_flowrate
 
-            self.send((msg_time, outflow), 'outflow')
+            self.send((msg_time, outflow), 'process-heat')
 
     def __step(self, time=0.0):
 
@@ -234,7 +236,7 @@ class Turbine(Module):
         p_out_MPa = self.vent_pressure/unit.mega/unit.pascal
         print(self.inflow_quality, self.inflow_temp)
 
-        # If entering stream is not steam (valve closed scenario)        
+        # If entering stream is not steam (valve closed scenario)
         if self.inflow_temp < steam_table._TSat_P(p_in_MPa):
             t_runoff = self.inflow_temp
             power = 0
@@ -293,9 +295,6 @@ class Turbine(Module):
 
             power = self.inflow_mass_flowrate * w_real
 
-        process_heat = power*self.process_heat_fraction
-        power *= 1-self.process_heat_fraction
-
         # Update state variables
         turbine_outflow = self.outflow_phase.get_row(time)
         turbine = self.state_phase.get_row(time)
@@ -311,7 +310,7 @@ class Turbine(Module):
 
         self.state_phase.add_row(time, turbine)
 
-        self.state_phase.set_value('power', power, time)
-        self.state_phase.set_value('process-heat', process_heat, time)
+        self.state_phase.set_value('power', power*unit.kilo*unit.watt, time)
+        self.state_phase.set_value('process-heat', self.process_heat_pwr, time)
 
         return time

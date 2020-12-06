@@ -55,13 +55,14 @@ class Condenser(Module):
 
         # Initialization
 
-        self.inflow_pressure = 34*unit.bar
         self.inflow_temp = (20+273)*unit.K
+        #self.inflow_pressure = 34*unit.bar
+        self.inflow_pressure = 0.008066866*unit.mega*unit.pascal
         self.inflow_mass_flowrate = 67*unit.kg/unit.second
 
-        self.outflow_temp = (20+273.15)*unit.K
-        self.outflow_mass_flowrate = 67*unit.kg/unit.second
-        self.outflow_pressure = 34*unit.bar
+        self.outflow_temp = 50 + 273.15
+        self.outflow_pressure = 34.0*unit.bar
+        self.outflow_mass_flowrate = self.inflow_mass_flowrate
 
         # Outflow phase history
         quantities = list()
@@ -121,14 +122,14 @@ class Condenser(Module):
             else:
                 self.__logit = False
 
-            # Communicate information
-            #------------------------
-            self.__call_ports(time)
-
             # Evolve one time step
             #---------------------
 
             time = self.__step(time)
+
+            # Communicate information
+            #------------------------
+            self.__call_ports(time)
 
     def __call_ports(self, time):
 
@@ -169,22 +170,15 @@ class Condenser(Module):
 
     def __step(self, time=0.0):
 
-        # Comput state
-        #print('inflow pressure [bar] = ',self.inflow_pressure/unit.bar)
-        water = steam_table(P=self.inflow_pressure/unit.mega/unit.pascal, x=0.0)
 
-        outflow_temp = water.T
-        outflow_mass_flowrate = self.inflow_mass_flowrate
-        outflow_pressure = self.inflow_pressure
-
-        #update state variables
+        # Update state variables
         condenser_outflow = self.outflow_phase.get_row(time)
 
         time += self.time_step
 
         self.outflow_phase.add_row(time, condenser_outflow)
-        self.outflow_phase.set_value('temp', outflow_temp, time)
-        self.outflow_phase.set_value('flowrate', outflow_mass_flowrate , time)
-        self.outflow_phase.set_value('pressure', outflow_pressure, time)
+        self.outflow_phase.set_value('temp', self.outflow_temp, time)
+        self.outflow_phase.set_value('flowrate', self.outflow_mass_flowrate , time)
+        self.outflow_phase.set_value('pressure', self.outflow_pressure, time)
 
         return time
