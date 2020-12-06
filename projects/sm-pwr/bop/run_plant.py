@@ -23,7 +23,7 @@ def main():
     make_run   = True
 
     # Preamble
-    end_time = 10*unit.minute
+    end_time = 30*unit.minute
     time_step = 1.5*unit.second
     show_time = (True, 5*unit.minute)
 
@@ -40,7 +40,7 @@ def main():
     reactor.end_time = end_time
     reactor.show_time = show_time
 
-    #plant_net.module(reactor)  # Add reactor module to network
+    plant_net.module(reactor)  # Add reactor module to network
 
     # Steamer
 
@@ -92,8 +92,8 @@ def main():
 
     # Balance of Plant Network Connectivity
 
-    #plant_net.connect([reactor, 'coolant-outflow'], [steamer, 'primary-inflow'])
-    #plant_net.connect([steamer, 'primary-outflow'], [reactor, 'coolant-inflow'])
+    plant_net.connect([reactor, 'coolant-outflow'], [steamer, 'primary-inflow'])
+    plant_net.connect([steamer, 'primary-outflow'], [reactor, 'coolant-inflow'])
     #plant_net.connect([steamer, 'secondary-outflow'], [turbine, 'inflow'])
     #plant_net.connect([turbine, 'outflow'], [condenser, 'inflow'])
     #plant_net.connect([turbine, 'process-heat'], [water_heater, 'heat'])
@@ -109,10 +109,10 @@ def main():
     # Plots
     if make_plots and plant.use_multiprocessing or plant.rank == 0:
 
-        '''
         # Reactor plots
         reactor = plant_net.modules[0]
 
+        '''
         (quant, time_unit) = reactor.neutron_phase.get_quantity_history('neutron-dens')
         quant.plot(x_scaling=1/unit.minute, y_scaling=1/max(quant.value),
                    x_label='Time [m]', y_label=quant.latex_name+' ['+quant.unit+']')
@@ -141,22 +141,23 @@ def main():
                    y_label=quant.latex_name+' [C]')
         plt.grid()
         plt.savefig('reactor-fuel-temp.png', dpi=300)
+        '''
 
-        (quant, time_unit) = reactor.reactor_phase.get_quantity_history('power')
+        (quant, time_unit) = reactor.state_phase.get_quantity_history('power')
 
         quant.plot(x_scaling=1/unit.minute, y_scaling=1/unit.mega, x_label='Time [m]',
                    y_label=quant.latex_name+' [M'+quant.unit+']')
         plt.grid()
         plt.savefig('reactor-power.png', dpi=300)
 
-        (quant, time_unit) = reactor.reactor_phase.get_quantity_history('reynolds')
+        (quant, time_unit) = reactor.state_phase.get_quantity_history('reynolds')
 
         quant.plot(x_scaling=1/unit.minute, y_scaling=1/unit.mega, x_label='Time [m]',
                    y_label=quant.latex_name+r' [$\times 10^6$'+quant.unit+']')
         plt.grid()
         plt.savefig('reactor-reynolds.png', dpi=300)
 
-        (quant, time_unit) = reactor.reactor_phase.get_quantity_history('prandtl')
+        (quant, time_unit) = reactor.state_phase.get_quantity_history('prandtl')
 
         quant.plot(x_scaling=1/unit.minute, x_label='Time [m]',
                    y_label=quant.latex_name+r' ['+quant.unit+']')
@@ -190,7 +191,7 @@ def main():
                    y_label=quant.latex_name+' ['+quant.unit+']')
         plt.grid()
         plt.savefig('reactor-nusselt.png', dpi=300)
-
+        '''
         (quant, time_unit) = reactor.state_phase.get_quantity_history('tau')
 
         quant.plot(x_scaling=1/unit.minute, x_label='Time [m]',
@@ -206,10 +207,8 @@ def main():
         plt.savefig('reactor-coolant-outflow-quality.png', dpi=300)
         '''
 
-
         # Steamer plots
-        steamer = plant_net.modules[0]
-        #steamer = plant_net.modules[1]
+        steamer = plant_net.modules[1]
 
         (quant, time_unit) = steamer.primary_outflow_phase.get_quantity_history('temp')
 
@@ -246,7 +245,6 @@ def main():
         plt.grid()
         plt.savefig('steamer-secondary-quality.png', dpi=300)
 
-        '''
         (quant, time_unit) = steamer.state_phase.get_quantity_history('heatflux')
 
         quant.plot(x_scaling=1/unit.minute, y_scaling=1/unit.kilo, x_label='Time [m]',
@@ -267,7 +265,6 @@ def main():
                    y_label=quant.latex_name+' ['+quant.unit+']')
         plt.grid()
         plt.savefig('steamer-nusselt_s.png', dpi=300)
-        '''
 
 
         '''
