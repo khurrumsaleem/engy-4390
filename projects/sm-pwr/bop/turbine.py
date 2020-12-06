@@ -59,15 +59,15 @@ class Turbine(Module):
 
         # Initialization
 
-        self.inflow_temp = 307+273.15 #K
+        self.inflow_temp = 20+273.15 #K
+        #self.inflow_pressure = 1.0*unit.bar
         self.inflow_pressure = 34*unit.bar
         self.inflow_mass_flowrate = 67*unit.kg/unit.second
-        self.inflow_quality = 0
 
-        self.outflow_temp = 70+272.15 #K
+        self.outflow_temp = 20+272.15 #K
         self.outflow_pressure = self.vent_pressure
         self.outflow_mass_flowrate = 67*unit.kg/unit.second
-        self.outflow_quality = 1.0
+        self.outflow_quality = 0.0
 
         # Outflow phase history
         quantities = list()
@@ -111,7 +111,7 @@ class Turbine(Module):
         quantities = list()
 
         power = Quantity(name='power',
-                         formal_name='W_s', unit='W_e',
+                         formal_name='W_s', unit='W$_e$',
                          value=0.0,
                          latex_name=r'$W_s$',
                          info='Turbine Power')
@@ -119,9 +119,9 @@ class Turbine(Module):
         quantities.append(power)
 
         process_heat = Quantity(name='process-heat',
-                         formal_name='Q_t', unit='W_t',
+                         formal_name='W_s', unit='W_e',
                          value=0.0,
-                         latex_name=r'$Q_t$',
+                         latex_name=r'$W_s$',
                          info='Turbine Process Heat Power')
 
         quantities.append(process_heat)
@@ -157,11 +157,10 @@ class Turbine(Module):
             else:
                 self.__logit = False
 
-
             # Evolve one time step
             #---------------------
             time = self.__step(time)
-            
+
             # Communicate information
             #------------------------
             self.__call_ports(time)
@@ -184,8 +183,6 @@ class Turbine(Module):
             self.inflow_temp = inflow['temperature']
             self.inflow_pressure = inflow['pressure']
             self.inflow_mass_flowrate = inflow['mass_flowrate']
-            #self.inflow_quality = inflow['quality']
-            
 
         # Interactions in the outflow port
         #-----------------------------------------
@@ -233,13 +230,12 @@ class Turbine(Module):
         # Get state values
         p_in_MPa = self.inflow_pressure/unit.mega/unit.pascal
         p_out_MPa = self.vent_pressure/unit.mega/unit.pascal
-        
+
         # If entering stream is not steam (valve closed scenario)        
         if self.inflow_temp < steam_table._TSat_P(p_in_MPa):
             t_runoff = self.inflow_temp
             power = 0
             quality = 0
-            
 
         else:
             s_out_prime = steam_table._Region2(self.inflow_temp, p_in_MPa)['s']
@@ -293,10 +289,10 @@ class Turbine(Module):
                 t_runoff = steam_table._Region4(p_out_MPa, quality)['T']
 
             power = self.inflow_mass_flowrate * w_real
-            
 
         process_heat = power*self.process_heat_fraction
-        #power *= 1-self.process_heat_fraction
+        power *= 1-self.process_heat_fraction
+
         # Update state variables
         turbine_outflow = self.outflow_phase.get_row(time)
         turbine = self.state_phase.get_row(time)
