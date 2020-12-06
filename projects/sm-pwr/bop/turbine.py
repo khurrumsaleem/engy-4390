@@ -157,13 +157,14 @@ class Turbine(Module):
             else:
                 self.__logit = False
 
-            # Communicate information
-            #------------------------
-            self.__call_ports(time)
 
             # Evolve one time step
             #---------------------
             time = self.__step(time)
+            
+            # Communicate information
+            #------------------------
+            self.__call_ports(time)
 
     def __call_ports(self, time):
 
@@ -183,7 +184,7 @@ class Turbine(Module):
             self.inflow_temp = inflow['temperature']
             self.inflow_pressure = inflow['pressure']
             self.inflow_mass_flowrate = inflow['mass_flowrate']
-            self.inflow_quality = inflow['quality']
+            #self.inflow_quality = inflow['quality']
             
 
         # Interactions in the outflow port
@@ -238,7 +239,7 @@ class Turbine(Module):
             t_runoff = self.inflow_temp
             power = 0
             quality = 0
-            print('MADE IT HERE')
+            
 
         else:
             s_out_prime = steam_table._Region2(self.inflow_temp, p_in_MPa)['s']
