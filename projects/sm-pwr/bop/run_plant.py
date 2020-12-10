@@ -270,7 +270,30 @@ def main():
         plt.grid()
         plt.savefig('steamer-nusselt_s.png', dpi=300)
 
+        (quant_1, time_unit) = steamer.primary_outflow_phase.get_quantity_history('temp')
+        y = [i for i in quant_1.value]
+        (quant_2, time_unit) = steamer.secondary_outflow_phase.get_quantity_history('temp')
+        y_2 = [i for i in quant_2.value]
+        fig = plt.figure(1)
+        plt.xlabel('Time [min]')
+        plt.ylabel('Temperature [K]')
+        plt.title('Temperature vs Time',fontsize=20)
+        plt.xlim(1.6,2.0) 
+            
 
+        temp1 = steamer.primary_outflow_phase.get_quantity_history('temp')[0].value
+        temp2 = steamer.secondary_outflow_phase.get_quantity_history('temp')[0].value
+
+        plt.plot(list(temp1.index/60), temp1.tolist(), label = "Primary Outflow")
+        plt.plot(list(temp2.index/60), temp2.tolist(), label = "Secondary Outflow")
+
+
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+
+        plt.rcParams['figure.figsize'] = [8,5]
+        plt.grid()
+        plt.show()  
+        plt.savefig('steamer-temperature.png', dpi=300)
         # Turbine plots
         turbine = plant_net.modules[2]
 

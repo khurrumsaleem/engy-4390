@@ -487,7 +487,7 @@ class SMPWR(Module):
               if q_vol > 0 and time > self.discard_tau_recording_before else 0
 
         self.state_phase.set_value('tau', tau, time)
-
+        print(time)
         return time
 
     def __get_state_vector(self, time):
@@ -558,7 +558,8 @@ class SMPWR(Module):
 
         rho_t = self.rho_0 + alpha_n * (n_dens - n_dens_ref) + \
                              alpha_tn * (temp - temp_ref)
-
+        if time > 2400:
+            rho_t -= 1e-3
         return rho_t
 
     def __q_source(self, time):
