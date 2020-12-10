@@ -558,8 +558,12 @@ class SMPWR(Module):
 
         rho_t = self.rho_0 + alpha_n * (n_dens - n_dens_ref) + \
                              alpha_tn * (temp - temp_ref)
+<<<<<<< HEAD
         if time > 2400:
             rho_t -= 1e-3
+=======
+
+>>>>>>> parent of 93103be... Reactor shutdown
         return rho_t
 
     def __q_source(self, time):
