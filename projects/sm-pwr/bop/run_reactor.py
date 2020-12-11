@@ -19,7 +19,7 @@ def main():
     make_run   = True
 
     # Preamble
-    end_time = 60*unit.minute
+    end_time = 5*unit.minute
     time_step = 1.5*unit.second
     show_time = (True, 1*unit.minute)
 
@@ -120,6 +120,21 @@ def main():
         plt.grid()
         plt.savefig('reactor-heatflux.png', dpi=300)
 
+        (quant1, time_unit) = reactor.state_phase.get_quantity_history('heatflux')
+        (quant2, time_unit) = reactor.state_phase.get_quantity_history('power')
+        #mplot(quant1,quant2,['heatflux','power'],'heat')
+        #multiplot example
+        def mplot(quant1,quant2,labels, name):
+            y = [i for i in quant1.value]
+            y2 = [i for i in quant2.value]
+            plt.plot(quant1.value.index/60,y, label=labels[0])
+            plt.plot(quant1.value.index/60,y2, label = labels[1])
+            plt.grid(True)
+            plt.legend(loc='upper right')
+            #name.append('.png')
+            plt.savefig(name, dpi=300)
+        
+        mplot(quant1,quant2,['heatflux','power'],'heat.jpg')
         (quant, time_unit) = reactor.state_phase.get_quantity_history('inlet-temp')
 
         quant.plot(x_scaling=1/unit.minute, y_shift=273.15, x_label='Time [m]',
