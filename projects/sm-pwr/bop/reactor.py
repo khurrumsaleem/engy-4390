@@ -72,6 +72,7 @@ class SMPWR(Module):
         self.time_step = 10.0*unit.second
 
         self.show_time = (False, 10.0*unit.second)
+        self.save = True
 
         self.log = logging.getLogger('cortix')
         self.__logit = True # flag indicating when to log
@@ -108,9 +109,9 @@ class SMPWR(Module):
 
         self.fis_nuclide_num_dens = 9.84e26/unit.meter**3 # (fissile nuclei)/m3
 
-        self.fuel_dens = 10800*unit.kg/unit.meter**3
-        self.cp_fuel = 300*unit.joule/unit.kg/unit.kelvin
-        self.fuel_volume = 0.841*unit.meter**3
+        self.core_dens = 10800*unit.kg/unit.meter**3
+        self.cp_core = 300*unit.joule/unit.kg/unit.kelvin
+        self.core_volume = 0.841*unit.meter**3
 
         self.coolant_mass_flowrate_ss = 4.66e6*unit.lb/unit.hour
         self.flowrate_relaxation_startup = 5*unit.minute
@@ -118,7 +119,7 @@ class SMPWR(Module):
 
         self.coolant_pressure = 1850*unit.psi  # altered by coolant-inflow port
 
-        self.fuel_heat_transfer_area = 6275*unit.foot**2
+        self.core_heat_transfer_area = 6275*unit.foot**2
         self.core_flow_area = 9.79*unit.foot**2
         self.core_length = 95.89*unit.inch
         self.cladding_k = 12.1*unit.watt/unit.meter/unit.kelvin
@@ -209,62 +210,62 @@ class SMPWR(Module):
         # State phase
         quantities = list()
 
-        fuel_temp = Quantity(name='fuel-temp',
+        core_temp = Quantity(name='core-temp',
                              formal_name='T_f', unit='K',
                              value=self.temp_f_0,
                              latex_name=r'$T_f$',
                              info='Reactor Core Temperature')
-        quantities.append(fuel_temp)
+        quantities.append(core_temp)
 
         inlet_temp = Quantity(name='inlet-temp',
-                             formal_name='T_in', unit='K',
-                             value=self.inflow_cool_temp,
-                             latex_name=r'$T_{in}$',
-                             info='Reactor Coolant Inflow Temperature')
+                              formal_name='T_in', unit='K',
+                              value=self.inflow_cool_temp,
+                              latex_name=r'$T_{in}$',
+                              info='Reactor Coolant Inflow Temperature')
         quantities.append(inlet_temp)
 
         pwr = Quantity(name='power',
-                             formal_name='Pth', unit='W',
-                             value=0.0,
-                             latex_name=r'$P_{th}$',
-                             info='Reactor Power')
+                       formal_name='Pth', unit='W',
+                       value=0.0,
+                       latex_name=r'$P_{th}$',
+                       info='Reactor Power')
         quantities.append(pwr)
 
         rey = Quantity(name='reynolds',
-                             formal_name='Rey_c', unit='',
-                             value=0.0,
-                             latex_name=r'$R_{c}$',
-                             info='Reactor Coolant Reynolds Number')
+                       formal_name='Rey_c', unit='',
+                       value=0.0,
+                       latex_name=r'$R_{c}$',
+                       info='Reactor Coolant Reynolds Number')
         quantities.append(rey)
 
         water = WaterProps(T=self.temp_c_0, P=self.coolant_pressure/unit.mega/unit.pascal)
 
         prtl = Quantity(name='prandtl',
-                             formal_name='Pr_c', unit='',
-                             value=water.Prandt,
-                             latex_name=r'$Pr_{c}$',
-                             info='Reactor Coolant Prandtl Number')
+                        formal_name='Pr_c', unit='',
+                        value=water.Prandt,
+                        latex_name=r'$Pr_{c}$',
+                        info='Reactor Coolant Prandtl Number')
         quantities.append(prtl)
 
         q2prime = Quantity(name='heatflux',
-                             formal_name="q''", unit=r'W/m$^2$',
-                             value=0.0,
-                             latex_name=r"$q''$",
-                             info='Reactor Core Average Heat Flux')
+                           formal_name="q''", unit=r'W/m$^2$',
+                           value=0.0,
+                           latex_name=r"$q''$",
+                           info='Reactor Core Average Heat Flux')
         quantities.append(q2prime)
 
         nusselt = Quantity(name='nusselt',
-                             formal_name='Nu_c', unit='',
-                             value=0.0,
-                             latex_name=r'$Nu_{c}$',
-                             info='Reactor Coolant Nusselt Number')
+                           formal_name='Nu_c', unit='',
+                           value=0.0,
+                           latex_name=r'$Nu_{c}$',
+                           info='Reactor Coolant Nusselt Number')
         quantities.append(nusselt)
 
         tau = Quantity(name='tau',
-                             formal_name='tau', unit='s',
-                             value=0.0,
-                             latex_name=r'$\tau_{c}$',
-                             info='Reactor Coolant Residence Time')
+                       formal_name='tau', unit='s',
+                       value=0.0,
+                       latex_name=r'$\tau_{c}$',
+                       info='Reactor Coolant Residence Time')
         quantities.append(tau)
 
         self.state_phase = Phase(time_stamp=self.initial_time, time_unit='s',
@@ -376,12 +377,11 @@ class SMPWR(Module):
 
         t_interval_sec = np.linspace(time, time+self.time_step, num=2)
 
-        max_n_steps_per_time_step = 1000 # max number of nonlinear algebraic solver
+        max_n_steps_per_time_step = 1500 # max number of nonlinear algebraic solver
                                          # iterations per time step
 
         (u_vec_hist, info_dict) = odeint(self.__f_vec, u_0, t_interval_sec,
-                                         #rtol=1e-4, atol=1e-8,
-                                         #rtol=1e-4, atol=1e-5,
+                                         rtol=1e-7, atol=1e-8,
                                          mxstep=max_n_steps_per_time_step,
                                          full_output=True, tfirst=False)
 
@@ -392,7 +392,7 @@ class SMPWR(Module):
         n_dens = u_vec[0]
         c_vec = u_vec[1:7]
         mass_flowrate = u_vec[7]
-        fuel_temp = u_vec[8]
+        core_temp = u_vec[8]
         cool_temp = u_vec[9]
 
         # Update phases
@@ -412,7 +412,7 @@ class SMPWR(Module):
         self.neutron_phase.set_value('neutron-dens', n_dens, time)
         self.neutron_phase.set_value('delayed-neutrons-cc', c_vec, time)
 
-        self.state_phase.set_value('fuel-temp', fuel_temp, time)
+        self.state_phase.set_value('core-temp', core_temp, time)
         self.state_phase.set_value('inlet-temp', self.inflow_cool_temp, time)
 
         # Coolant properties
@@ -452,10 +452,10 @@ class SMPWR(Module):
         self.state_phase.set_value('prandtl', prtl_c, time)
 
         # Heat flux and Nusselt number
-        (heat_sink_rate, nusselt) = self.__heat_sink_rate(fuel_temp, water,
+        (heat_sink_rate, nusselt) = self.__heat_sink_rate(core_temp, water,
                                                           mass_flowrate)
 
-        q2prime = - heat_sink_rate/self.fuel_heat_transfer_area
+        q2prime = - heat_sink_rate/self.core_heat_transfer_area
         if q2prime < 0.0: # case when reactor is heated by the coolant inflow
             q2prime = 0.0
         self.state_phase.set_value('heatflux', q2prime, time)
@@ -500,7 +500,7 @@ class SMPWR(Module):
     def __get_state_vector(self, time):
         """Return a numpy array of all unknowns ordered as shown.
            Neutron density, delayed neutron emmiter concentrations,
-           termperature of fuel, and temperature of coolant.
+           temperature of core, and temperature of coolant.
         """
 
         u_vec = np.empty(0, dtype=np.float64)
@@ -514,8 +514,8 @@ class SMPWR(Module):
         flowrate = self.coolant_outflow_phase.get_value('flowrate', time)
         u_vec = np.append(u_vec, flowrate)
 
-        fuel_temp = self.state_phase.get_value('fuel-temp', time)
-        u_vec = np.append(u_vec, fuel_temp)
+        core_temp = self.state_phase.get_value('core-temp', time)
+        u_vec = np.append(u_vec, core_temp)
 
         temp = self.coolant_outflow_phase.get_value('temp', time)
         u_vec = np.append(u_vec, temp)
@@ -634,7 +634,7 @@ class SMPWR(Module):
 
         mass_flowrate = u_vec[-3]
 
-        temp_f = u_vec[-2] # get temperature of fuel
+        temp_f = u_vec[-2] # get temperature of core
 
         temp_c = u_vec[-1] # get temperature of coolant
 
@@ -676,7 +676,7 @@ class SMPWR(Module):
 
         if self.shutdown[0] and time > self.shutdown[1]:
             tau = self.flowrate_relaxation_shutdown
-            self.coolant_mass_flowrate_ss = 0.0
+            self.coolant_mass_flowrate_ss = 1.0*unit.kg/unit.second
         else:
             tau = self.flowrate_relaxation_startup
 
@@ -692,19 +692,15 @@ class SMPWR(Module):
         (heat_sink_pwr, _) = self.__heat_sink_rate(temp_f, water, mass_flowrate)
 
         #--------------------
-        # fuel energy balance
+        # core energy balance
         #--------------------
-        rho_f = self.fuel_dens
-        cp_f = self.cp_fuel
-        vol_fuel = self.fuel_volume
+        rho_f = self.core_dens
+        cp_f = self.cp_core
+        vol_core = self.core_volume
 
         nuclear_pwr_dens = self.__nuclear_pwr_dens_func(time, (temp_f+temp_c)/2, n_dens)
 
-        heat_sink_pwr_dens = heat_sink_pwr/vol_fuel
-
-        #if time > 11*unit.minute:
-             #print(n_dens)
-        #    print(nuclear_pwr_dens/unit.mega, heat_sink_pwr_dens/unit.mega)
+        heat_sink_pwr_dens = heat_sink_pwr/vol_core
 
         f_tmp[-2] = -1/rho_f/cp_f * (nuclear_pwr_dens - heat_sink_pwr_dens)
 
@@ -743,7 +739,7 @@ class SMPWR(Module):
         return f_tmp
 
     def __heat_sink_rate(self, temp_f, water, coolant_mass_flowrate):
-        """Cooling rate of the fuel.
+        """Cooling rate of the core.
 
            Assumptions
            -----------
@@ -831,7 +827,7 @@ class SMPWR(Module):
         one_over_U = 1.0/h_c
 
         # Total area of heat tranfer
-        area = self.fuel_heat_transfer_area
+        area = self.core_heat_transfer_area
 
         UA = area * 1/one_over_U
 

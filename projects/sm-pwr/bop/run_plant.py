@@ -23,7 +23,7 @@ def main():
     make_run   = True
 
     # Preamble
-    end_time = 60*unit.minute
+    end_time = 75*unit.minute
     time_step = 1.5*unit.second
     show_time = (True, 5*unit.minute)
 
@@ -34,13 +34,7 @@ def main():
     # Reactor
     reactor = SMPWR()  # Create reactor module
 
-    reactor.name = 'SMPWR'
-    reactor.save = True
-    reactor.time_step = time_step
-    reactor.end_time = end_time
-    reactor.show_time = show_time
-
-    reactor.shutdown = (True, 40*unit.minute)
+    reactor.shutdown = (True, 60*unit.minute)
 
     plant_net.module(reactor)  # Add reactor module to network
 
@@ -48,23 +42,11 @@ def main():
 
     steamer = Steamer()  # Create reactor module
 
-    steamer.name = 'Steamer'
-    steamer.save = True
-    steamer.time_step = time_step
-    steamer.end_time = end_time
-    steamer.show_time = show_time
-
     plant_net.module(steamer)  # Add steamer module to network
 
     # Turbine
 
     turbine = Turbine()  # Create reactor module
-
-    turbine.name = 'Turbine'
-    turbine.save = True
-    turbine.time_step = time_step
-    turbine.end_time = end_time
-    turbine.show_time = show_time
 
     plant_net.module(turbine)  # Add steamer module to network
 
@@ -72,25 +54,13 @@ def main():
 
     condenser = Condenser()  # Create condenser module
 
-    condenser.name = 'Condenser'
-    condenser.save = True
-    condenser.time_step = time_step
-    condenser.end_time = end_time
-    condenser.show_time = show_time
-
     plant_net.module(condenser)  # Add condenser module to network`
 
     '''Feedwater Heating system'''
 
     water_heater = WaterHeater()  # Create water_heater module
 
-    water_heater.name = 'Water Heater'
-    water_heater.save = True
-    water_heater.time_step = time_step
-    water_heater.end_time = end_time
-    water_heater.show_time = show_time
-
-    water_heater.malfunction = (False, 10*unit.minute, 20*unit.minute)
+    water_heater.malfunction = (True, 30*unit.minute, 45*unit.minute)
 
     plant_net.module(water_heater)  # Add water_heater module to network
 
@@ -108,7 +78,16 @@ def main():
 
     # Run
     if make_run:
+
+        for module in plant_net.modules:
+            module.time_step = time_step
+            module.end_time = end_time
+            module.show_time = show_time
+
         plant.run()  # Run network dynamics simulation
+
+    # Cortix run closure
+    plant.close()  # Properly shutdow plant
 
     # Plots
     if make_plots and plant.use_multiprocessing or plant.rank == 0:
@@ -138,12 +117,12 @@ def main():
         plt.grid()
         plt.savefig('reactor-coolant-outflow-temp.png', dpi=300)
 
-        (quant, time_unit) = reactor.state_phase.get_quantity_history('fuel-temp')
+        (quant, time_unit) = reactor.state_phase.get_quantity_history('core-temp')
 
         quant.plot(x_scaling=1/unit.minute, y_shift=273.15, x_label='Time [m]',
                    y_label=quant.latex_name+' [C]')
         plt.grid()
-        plt.savefig('reactor-fuel-temp.png', dpi=300)
+        plt.savefig('reactor-core-temp.png', dpi=300)
 
         (quant, time_unit) = reactor.state_phase.get_quantity_history('power')
 
@@ -171,7 +150,7 @@ def main():
         quant.plot(x_scaling=1/unit.minute, x_label='Time [m]',
                    y_label=quant.latex_name+r' ['+quant.unit+']')
         plt.grid()
-        plt.savefig('reactor-mass-flowrate.png', dpi=300)
+        plt.savefig('reactor-flowrate.png', dpi=300)
 
         (quant, time_unit) = reactor.state_phase.get_quantity_history('heatflux')
 
@@ -217,6 +196,20 @@ def main():
                    y_label=quant.latex_name+' [C]')
         plt.grid()
         plt.savefig('steamer-primary-outflow-temp.png', dpi=300)
+
+        (quant, time_unit) = steamer.secondary_inflow_phase.get_quantity_history('temp')
+
+        quant.plot(x_scaling=1/unit.minute, y_shift=273.15, x_label='Time [m]',
+                   y_label=quant.latex_name+' [C]')
+        plt.grid()
+        plt.savefig('steamer-secondary-inflow-temp.png', dpi=300)
+
+        (quant, time_unit) = steamer.secondary_inflow_phase.get_quantity_history('flowrate')
+
+        quant.plot(x_scaling=1/unit.minute, x_label='Time [m]',
+                   y_label=quant.latex_name+' ['+quant.unit+']')
+        plt.grid()
+        plt.savefig('steamer-secondary-inflow-flowrate.png', dpi=300)
 
         (quant, time_unit) = steamer.secondary_outflow_phase.get_quantity_history('temp')
 
@@ -274,7 +267,6 @@ def main():
         plt.grid()
         plt.savefig('steamer-nusselt_s.png', dpi=300)
 
-
         # Turbine plots
         turbine = plant_net.modules[2]
 
@@ -302,6 +294,20 @@ def main():
         # Condenser plots
         condenser = plant_net.modules[3]
 
+        (quant, time_unit) = condenser.inflow_phase.get_quantity_history('temp')
+
+        quant.plot(x_scaling=1/unit.minute, y_shift=273.15, x_label='Time [m]',
+                   y_label=quant.latex_name+' [C]')
+        plt.grid()
+        plt.savefig('condenser-inflow-temp.png', dpi=300)
+
+        (quant, time_unit) = condenser.inflow_phase.get_quantity_history('flowrate')
+
+        quant.plot(x_scaling=1/unit.minute, x_label='Time [m]',
+                   y_label=quant.latex_name+' ['+quant.unit+']')
+        plt.grid()
+        plt.savefig('condenser-inflow-flowrate.png', dpi=300)
+
         (quant, time_unit) = condenser.outflow_phase.get_quantity_history('temp')
 
         quant.plot(x_scaling=1/unit.minute, y_shift=273.15, x_label='Time [m]',
@@ -324,7 +330,7 @@ def main():
         quant.plot(x_scaling=1/unit.minute, x_label='Time [m]',
                    y_label=quant.latex_name+r' ['+quant.unit+']')
         plt.grid()
-        plt.savefig('water_heater-mass-flowrate.png', dpi=300)
+        plt.savefig('water_heater-flowrate.png', dpi=300)
 
         (quant, time_unit) = water_heater.inflow_phase.get_quantity_history('external-heat')
 
@@ -340,7 +346,6 @@ def main():
         plt.grid()
         plt.savefig('water_heater-rejected-heat.png', dpi=300)
 
-    plant.close()  # Properly shutdow plant
 
 if __name__ == '__main__':
     main()

@@ -46,6 +46,7 @@ class WaterHeater(Module):
         self.time_step = 10.0*unit.second
 
         self.show_time = (False, 10.0*unit.second)
+        self.save = True
 
         self.log = logging.getLogger('cortix')
         self.__logit = True # flag indicating when to log
@@ -71,7 +72,7 @@ class WaterHeater(Module):
         self.outflow_mass_flowrate = self.outflow_mass_flowrate_normal
 
         self.outflow_mass_flowrate_malfunction = 47*unit.kg/unit.second
-        self.outflow_temp_loss_malfunction = 15*unit.K
+        self.outflow_temp_loss_malfunction = 10*unit.K
 
         self.heat_source_rate_needed = 25*unit.mega*unit.watt
 
@@ -238,11 +239,11 @@ class WaterHeater(Module):
 
         t_interval_sec = np.linspace(time, time+self.time_step, num=2)
 
-        max_n_steps_per_time_step = 1000 # max number of nonlinear algebraic solver
+        max_n_steps_per_time_step = 1500 # max number of nonlinear algebraic solver
                                          # iterations per time step
 
         (u_vec_hist, info_dict) = odeint(self.__f_vec, u_0, t_interval_sec,
-                                         rtol=1e-4, atol=1e-8,
+                                         #rtol=1e-4, atol=1e-8,
                                          mxstep=max_n_steps_per_time_step,
                                          full_output=True, tfirst=False)
 
