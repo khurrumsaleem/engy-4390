@@ -23,13 +23,8 @@ def main():
     make_run   = True
 
     # Preamble
-<<<<<<< HEAD
 
-    end_time = 60*unit.minute
-
-=======
     end_time = 75*unit.minute
->>>>>>> main
     time_step = 1.5*unit.second
     show_time = (True, 5*unit.minute)
 
@@ -358,7 +353,59 @@ def main():
                    y_label=quant.latex_name+r' [M'+quant.unit+']')
         plt.grid()
         plt.savefig('water_heater-rejected-heat.png', dpi=300)
-
+        '''
+        # multiplots
+        def mplot2(quant1,quant2,labels, name):
+            y = [i for i in quant1.value]
+            y2 = [i for i in quant2.value]
+            plt.plot(quant1.value.index/60,y, label=labels[0])
+            plt.plot(quant1.value.index/60,y2, label = labels[1])
+            plt.grid(True)
+            plt.legend(loc='upper right')
+            #name.append('.png')
+            plt.savefig(name, dpi=300)
+            return
+        def mplot3(quant1,quant2,quant3,labels, name):
+            y = [i for i in quant1.value]
+            y2 = [i for i in quant2.value]
+            y3 = [i for i in quant3.value]
+            plt.plot(quant1.value.index/60,y, label=labels[0])
+            plt.plot(quant1.value.index/60,y2, label = labels[1])
+            plt.plot(quant1.value.index/60,y3, label = labels[2])
+            plt.grid(True)
+            plt.legend(loc='upper right')
+            #name.append('.png')
+            plt.savefig(name, dpi=300)
+            return
+        def mplot4(quant1,quant2,quant3,quant4,labels, name):
+            y = [i for i in quant1.value]
+            y2 = [i for i in quant2.value]
+            y3 = [i for i in quant3.value]
+            y4 = [i for i in quant4.value]
+            plt.plot(quant1.value.index/60,y, label=labels[0])
+            plt.plot(quant1.value.index/60,y2, label = labels[1])
+            plt.plot(quant1.value.index/60,y3, label = labels[2])
+            plt.plot(quant1.value.index/60,y3, label = labels[3])
+            plt.grid(True)
+            plt.legend(loc='upper right')
+            #name.append('.png')
+            plt.savefig(name, dpi=300)
+            return
+        (quant1, time_unit) = reactor.state_phase.get_quantity_history('fuel-temp')
+        (quant2, time_unit) = reactor.state_phase.get_quantity_history('inlet-temp')
+        (quant3, time_unit) = reactor.coolant_outflow_phase.get_quantity_history('temp')
+        mplot3(quant1,quant2,quant3, ['Fuel-Temp','Inlet-Temp','Outlet-Temp'],'Reactor-Temp-All.jpg')
+        
+        (quant4, time_unit) = reactor.coolant_outflow_phase.get_quantity_history('temp')
+        (quant5, time_unit) = steamer.primary_outflow_phase.get_quantity_history('temp')
+        (quant6, time_unit) = steamer.secondary_inflow_phase.get_quantity_history('temp')
+        (quant7, time_unit) = steamer.secondary_outflow_phase.get_quantity_history('temp')
+        mplot4(quant4,quant5,quant6,quant7,['Primary-in','Primary-out','Secondary-in','Secondary-out'],'Steamer-Temp-All.jpg')                           
+        (quant8, time_unit) = reactor.state_phase.get_quantity_history('power')                                                             
+        (quant9, time_unit) = turbine.state_phase.get_quantity_history('power')
+        (quant0, time_unit) = water_heater.inflow_phase.get_quantity_history('external-heat')
+        mplot3(quant8,quant9,quant0, ['Fuel-Power','Turbine-Power','Water-Heater-External'],'Power-All.jpg')
+        '''                                                                         
     plant.close()  # Properly shutdow plant
 
 if __name__ == '__main__':
