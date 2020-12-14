@@ -46,6 +46,7 @@ class WaterHeater(Module):
         self.time_step = 10.0*unit.second
 
         self.show_time = (False, 10.0*unit.second)
+        self.save = True
 
         self.log = logging.getLogger('cortix')
         self.__logit = True # flag indicating when to log
@@ -71,8 +72,7 @@ class WaterHeater(Module):
         self.outflow_mass_flowrate = self.outflow_mass_flowrate_normal
 
         self.outflow_mass_flowrate_malfunction = 47*unit.kg/unit.second
-        #self.outflow_temp_loss_malfunction = 15*unit.K
-        self.outflow_temp_loss_malfunction = 0*unit.K
+        self.outflow_temp_loss_malfunction = 10*unit.K
 
         self.heat_source_rate_needed = 25*unit.mega*unit.watt
 
@@ -170,6 +170,8 @@ class WaterHeater(Module):
             # Communicate information
             #------------------------
             self.__call_ports(time)
+
+        self.end_time = time # correct the final time if needed
 
     def __call_ports(self, time):
 

@@ -70,6 +70,7 @@ class Steamer(Module):
         self.time_step = 10.0*unit.second
 
         self.show_time = (False, 10.0*unit.second)
+        self.save = True
 
         self.log = logging.getLogger('cortix')
         self.__logit = True # flag indicating when to log
@@ -303,6 +304,8 @@ class Steamer(Module):
             # Communicate information
             #------------------------
             self.__call_ports(time)
+
+        self.end_time = time # correct the final time if needed
 
     def __call_ports(self, time):
 
