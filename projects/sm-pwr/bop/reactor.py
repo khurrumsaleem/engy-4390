@@ -173,13 +173,13 @@ class SMPWR(Module):
 
         quantities.append(press)
 
-        press = Quantity(name='quality',
+        quality = Quantity(name='quality',
                          formal_name='X_c', unit='%',
                          value=0.0,
                          latex_name=r'$\chi_c$',
                          info='Reactor Coolant Outflow Quality')
 
-        quantities.append(press)
+        quantities.append(quality)
 
         self.coolant_outflow_phase = Phase(time_stamp=self.initial_time,
                                            time_unit='s',
