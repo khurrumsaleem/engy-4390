@@ -271,7 +271,7 @@ class Turbine(Module):
             w_ideal = h_in - h_out_prime  #on a per mass basis
             assert w_ideal > 0
             w_real = w_ideal * self.turbine_efficiency
-            h_out_real = h_in - w_ideal
+            h_out_real = h_in - w_real
             assert h_out_real > 0
             if w_real < 0:
                 w_real = 0
@@ -313,3 +313,49 @@ class Turbine(Module):
         self.state_phase.set_value('rejected-heat', self.rejected_heat_pwr, time)
 
         return time
+
+    
+    def __get_state_vector(self, time):
+        """Return a numpy array of all unknowns ordered as shown.
+        """
+
+        u_vec = np.empty(0, dtype=np.float64)
+
+        temp = self.outflow_phase.get_value('temp', time)
+        pressure = self.outflow_phase.get_value('pressure', pressure)
+        u_vec = np.append(u_vec, temp)
+
+        return  u_vec
+
+    def __f_vec(self, u_vec, time):
+
+        temp = u_vec[0]
+        pressure = u_vec[1]
+
+        # initialize f_vec to zero
+        f_tmp = np.zeros(1, dtype=np.float64) # vector for f_vec return
+
+        #-----------------------
+        # primary energy balance
+        #-----------------------
+        water = steam_table(T=temp, P=pressure)
+
+        rho = water.rho
+        cp = water.Liquid.cp*unit.kj/unit.kg/unit.K
+        vol = self.volume
+
+        temp_in = self.inflow_temp
+
+        tau = vol/(self.inflow_mass_flowrate/rho)
+
+        #-----------------------
+        # calculations
+        #-----------------------
+        heat_source_pwr = self.external_heat_source_rate + \
+                          self.electric_heat_source_rate
+
+        heat_source_pwr_dens = heat_source_pwr/vol
+
+        f_tmp[0] = - 1/tau * (temp - temp_in) + 1./rho/cp * heat_source_pwr_dens
+
+        return f_tmp    
