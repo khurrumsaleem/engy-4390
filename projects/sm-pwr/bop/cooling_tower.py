@@ -14,8 +14,8 @@ from cortix import Module
 from cortix.support.phase_new import PhaseNew as Phase
 from cortix import Quantity
 
-class Condenser(Module):
-    """Steam generator.
+class CoolingTower(Module):
+    """Cooling Tower Module.
 
     Notes
     -----
@@ -199,18 +199,67 @@ class Condenser(Module):
 
 
         # Update state variables
-        condenser_outflow = self.outflow_phase.get_row(time)
-        condenser_inflow = self.inflow_phase.get_row(time)
+        tower_outflow = self.outflow_phase.get_row(time)
+        tower_inflow = self.inflow_phase.get_row(time)
 
         time += self.time_step
 
-        self.inflow_phase.add_row(time, condenser_inflow)
+        self.inflow_phase.add_row(time, tower_inflow)
         self.inflow_phase.set_value('temp', self.inflow_temp, time)
         self.inflow_phase.set_value('flowrate', self.inflow_mass_flowrate , time)
 
-        self.outflow_phase.add_row(time, condenser_outflow)
+        self.outflow_phase.add_row(time, tower_outflow)
         self.outflow_phase.set_value('temp', self.outflow_temp, time)
         self.outflow_phase.set_value('flowrate', self.outflow_mass_flowrate , time)
         self.outflow_phase.set_value('pressure', self.outflow_pressure, time)
 
         return time
+
+    def __get_state_vector(self, time):
+        """Return a numpy array of all unknowns ordered as shown.
+        """
+
+        u_vec = np.empty(0, dtype=np.float64)
+
+        temp_out = self.outflow_phase.get_value('temp', time)
+        flowrate_out = self.outflow_phase.get_value('flowrate', time)
+        u_vec = np.append(u_vec, temp)
+        u_vec = np.append(u_vec, flowrate)
+        
+        return  u_vec
+
+    def __f_vec(self, u_vec, time):
+
+        temp = u_vec[0]
+        flowrate = u_vec[0]
+        # initialize f_vec to zero
+        f_tmp = np.zeros(2, dtype=np.float64) # vector for f_vec return
+
+        #-----------------------
+        # primary energy balance
+        #-----------------------
+        water_out = steam_table(T=temp,
+                            P=self.inflow_pressure/unit.mega/unit.pascal)
+        water_in = steam_table(T=self.inflow_temp,
+                            P=self.inflow_pressure/unit.mega/unit.pascal)
+        assert water.phase != 'Vapour'
+
+        rho = water.rho
+        cp = water.Liquid.cp*unit.kj/unit.kg/unit.K
+        vol = self.volume
+
+        temp_in = self.inflow_temp
+
+        tau = vol/(self.inflow_mass_flowrate/rho)
+
+        #-----------------------
+        # calculations
+        #-----------------------
+        heat_source_pwr = self.external_heat_source_rate + \
+                          self.electric_heat_source_rate
+
+        heat_source_pwr_dens = heat_source_pwr/vol
+
+        f_tmp[0] = - 1/tau * (temp - temp_in) + 1./rho/cp * heat_source_pwr_dens
+
+        return f_tmp
