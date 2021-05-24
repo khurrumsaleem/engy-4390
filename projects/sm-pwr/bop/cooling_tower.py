@@ -242,12 +242,19 @@ class CoolingTower(Module):
                             P=self.inflow_pressure/unit.mega/unit.pascal)
         water_in = steam_table(T=self.inflow_temp,
                             P=self.inflow_pressure/unit.mega/unit.pascal)
+        temp_avg = (temp+self.inflow_temp)/2
+        water_avg = steam_table(T=temp_avg,
+                            P=self.inflow_pressure/unit.mega/unit.pascal)
+        hvap = 2256.4+ (2500.9-2256.4)*(temp_avg/100)
+        
+        
         assert water.phase != 'Vapour'
 
-        rho = water.rho
-        cp = water.Liquid.cp*unit.kj/unit.kg/unit.K
+        cp_in = water_in.Liquid.cp*unit.kj/unit.kg/unit.K
+        cp_out = water_out.Liquid.cp*unit.kj/unit.kg/unit.K
+        cp_avg = water_avg.Liquid.cp*unit.kj/unit.kg/unit.K
         vol = self.volume
-
+        
         temp_in = self.inflow_temp
 
         tau = vol/(self.inflow_mass_flowrate/rho)
