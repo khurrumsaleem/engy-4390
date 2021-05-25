@@ -253,6 +253,7 @@ class CoolingTower(Module):
         cp_in = water_in.Liquid.cp*unit.kj/unit.kg/unit.K
         cp_out = water_out.Liquid.cp*unit.kj/unit.kg/unit.K
         cp_avg = water_avg.Liquid.cp*unit.kj/unit.kg/unit.K
+        rho_avg = water_avg.rho
         vol = self.volume
         
         temp_in = self.inflow_temp
@@ -262,10 +263,6 @@ class CoolingTower(Module):
         #-----------------------
         # calculations
         #-----------------------
-        heat_source_pwr = self.external_heat_source_rate + \
-                          self.electric_heat_source_rate
-
-        heat_source_pwr_dens = heat_source_pwr/vol
 
         f_tmp[0] = - 1/tau * (temp - temp_in) + 1./rho/cp * heat_source_pwr_dens
 
