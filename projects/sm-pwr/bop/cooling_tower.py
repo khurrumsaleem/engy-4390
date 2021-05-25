@@ -6,9 +6,12 @@
 
 import logging
 
-import unit
-
 from iapws import IAPWS97 as steam_table
+
+from scipy.integrate import odeint
+import numpy as np
+
+import unit
 
 from cortix import Module
 from cortix.support.phase_new import PhaseNew as Phase
@@ -51,9 +54,9 @@ class CoolingTower(Module):
         self.__logit = True # flag indicating when to log
 
         # Domain attributes
-
+        
         # Configuration parameters
-
+        self.volume = 283*unit.meter**3
         # Initialization
 
         self.inflow_temp = (43.3333+273)*unit.K
@@ -70,7 +73,7 @@ class CoolingTower(Module):
 
         flowrate = Quantity(name='flowrate',
                             formal_name='q_1', unit='kg/s',
-                            value=self.outflow_mass_flowrate,
+                            value=self.inflow_mass_flowrate,
                             latex_name=r'$q_1$',
                             info='Condenser Inflow Mass Flowrate')
 
@@ -78,7 +81,7 @@ class CoolingTower(Module):
 
         temp = Quantity(name='temp',
                         formal_name='T_1', unit='K',
-                        value=self.outflow_temp,
+                        value=self.inflow_temp,
                         latex_name=r'$T_1$',
                         info='Condenser Inflow Temperature')
 
@@ -241,8 +244,8 @@ class CoolingTower(Module):
 
         temp_out = self.outflow_phase.get_value('temp', time)
         flowrate_out = self.outflow_phase.get_value('flowrate', time)
-        u_vec = np.append(u_vec, temp)
-        u_vec = np.append(u_vec, flowrate)
+        u_vec = np.append(u_vec, temp_out)
+        u_vec = np.append(u_vec, flowrate_out)
         
         return  u_vec
 
@@ -256,6 +259,9 @@ class CoolingTower(Module):
         #-----------------------
         # primary energy balance
         #-----------------------
+        print(temp,'temp')
+        print(self.inflow_pressure/unit.mega/unit.pascal,'pressure')
+        print('time',time)
         water_out = steam_table(T=temp,
                             P=self.inflow_pressure/unit.mega/unit.pascal)
         water_in = steam_table(T=self.inflow_temp,
@@ -266,7 +272,7 @@ class CoolingTower(Module):
         hvap = 2256.4+ (2500.9-2256.4)*(temp_avg/100)
         
         
-        assert water.phase != 'Vapour'
+        assert water_in.phase != 'Vapour'
 
         cp_in = water_in.Liquid.cp*unit.kj/unit.kg/unit.K
         cp_out = water_out.Liquid.cp*unit.kj/unit.kg/unit.K
@@ -276,7 +282,7 @@ class CoolingTower(Module):
         
         temp_in = self.inflow_temp
 
-        tau = vol/(self.inflow_mass_flowrate/rho)
+        tau = vol/(self.inflow_mass_flowrate/rho_avg)
 
         #-----------------------
         # calculations

@@ -20,8 +20,8 @@ def main():
     make_run   = True
 
     # Preamble
-    end_time = 10*unit.minute
-    time_step = 1.5*unit.second
+    end_time = 1*unit.minute
+    time_step = 0.5*unit.second
     show_time = (True, 5*unit.minute)
 
     plant = Cortix(use_mpi=False, splash=True) # System top level
