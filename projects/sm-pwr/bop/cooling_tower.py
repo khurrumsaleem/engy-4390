@@ -56,13 +56,13 @@ class CoolingTower(Module):
 
         # Initialization
 
-        self.inflow_temp = (20+273)*unit.K
+        self.inflow_temp = (43.3333+273)*unit.K
         #self.inflow_pressure = 34*unit.bar
-        self.inflow_pressure = 0.008066866*unit.mega*unit.pascal
-        self.inflow_mass_flowrate = 67*unit.kg/unit.second
+        self.inflow_pressure = 0.101325*unit.mega*unit.pascal
+        self.inflow_mass_flowrate = 114*unit.kg/unit.second
 
-        self.outflow_temp = 50 + 273.15
-        self.outflow_pressure = 34.0*unit.bar
+        self.outflow_temp = 23 + 273.15
+        self.outflow_pressure =  0.101325*unit.mega*unit.pascal
         self.outflow_mass_flowrate = self.inflow_mass_flowrate
 
         # Inflow phase history
@@ -187,17 +187,35 @@ class CoolingTower(Module):
 
             temp = self.outflow_phase.get_value('temp', msg_time)
             pressure = self.outflow_phase.get_value('pressure', msg_time)
+            flowrate = self.outflow_phase.get_value('flowrate', msg_time)
 
             outflow = dict()
             outflow['temperature'] = temp
             outflow['pressure'] = pressure
-            self.outflow_mass_flowrate = self.inflow_mass_flowrate
-            outflow['mass_flowrate'] = self.outflow_mass_flowrate
+            outflow['mass_flowrate'] = flowrate
             self.send((msg_time, outflow), 'outflow')
 
     def __step(self, time=0.0):
 
+        u_0 = self.__get_state_vector(time)
 
+        t_interval_sec = np.linspace(time, time+self.time_step, num=2)
+
+        max_n_steps_per_time_step = 1500 # max number of nonlinear algebraic solver
+                                         # iterations per time step
+
+        (u_vec_hist, info_dict) = odeint(self.__f_vec, u_0, t_interval_sec,
+                                         #rtol=1e-4, atol=1e-8,
+                                         mxstep=max_n_steps_per_time_step,
+                                         full_output=True, tfirst=False)
+
+        assert info_dict['message'] == 'Integration successful.', info_dict['message']
+
+        u_vec = u_vec_hist[1, :]  # solution vector at final time step
+        
+        temp = u_vec[0]
+        flowrate = u_vec[1]
+        
         # Update state variables
         tower_outflow = self.outflow_phase.get_row(time)
         tower_inflow = self.inflow_phase.get_row(time)
@@ -209,8 +227,8 @@ class CoolingTower(Module):
         self.inflow_phase.set_value('flowrate', self.inflow_mass_flowrate , time)
 
         self.outflow_phase.add_row(time, tower_outflow)
-        self.outflow_phase.set_value('temp', self.outflow_temp, time)
-        self.outflow_phase.set_value('flowrate', self.outflow_mass_flowrate , time)
+        self.outflow_phase.set_value('temp', temp, time)
+        self.outflow_phase.set_value('flowrate', flowrate , time)
         self.outflow_phase.set_value('pressure', self.outflow_pressure, time)
 
         return time
@@ -264,6 +282,6 @@ class CoolingTower(Module):
         # calculations
         #-----------------------
 
-        f_tmp[0] = - 1/tau * (temp - temp_in) + 1./rho/cp * heat_source_pwr_dens
-
+        f_tmp[0] = - 1/(tau*cp_avg) * (temp_in*(cp_in+.0018*(cp_out*temp-hvap)) - temp*(cp_out+.0018*(cp_out*temp-hvap)))
+        f_tmp[1] = self.inflow_mass_flowrate - flowrate - self.inflow_mass_flowrate*.0018*(temp_in-temp)
         return f_tmp
