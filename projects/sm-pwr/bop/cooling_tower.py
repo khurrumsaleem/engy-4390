@@ -45,9 +45,9 @@ class CoolingTower(Module):
         # General attributes
         self.initial_time = 0.0*unit.second
         self.end_time = 1.0*unit.hour
-        self.time_step = 10.0*unit.second
+        self.time_step = 1.0*unit.second
 
-        self.show_time = (False, 10.0*unit.second)
+        self.show_time = (False, 1.0*unit.second)
         self.save = True
 
         self.log = logging.getLogger('cortix')
@@ -56,7 +56,8 @@ class CoolingTower(Module):
         # Domain attributes
         
         # Configuration parameters
-        self.volume = 283*unit.meter**3
+        self.volume = 2.83*unit.meter**3
+        self.t_ideal = 10 + 273.15
         # Initialization
 
         self.inflow_temp = (43.3333+273)*unit.K
@@ -64,7 +65,7 @@ class CoolingTower(Module):
         self.inflow_pressure = 0.101325*unit.mega*unit.pascal
         self.inflow_mass_flowrate = 114*unit.kg/unit.second
 
-        self.outflow_temp = 23 + 273.15
+        self.outflow_temp = 40 + 273.15
         self.outflow_pressure =  0.101325*unit.mega*unit.pascal
         self.outflow_mass_flowrate = self.inflow_mass_flowrate
 
@@ -252,15 +253,14 @@ class CoolingTower(Module):
     def __f_vec(self, u_vec, time):
 
         temp = u_vec[0]
-        flowrate = u_vec[0]
+        flowrate = u_vec[1]
         # initialize f_vec to zero
         f_tmp = np.zeros(2, dtype=np.float64) # vector for f_vec return
 
         #-----------------------
         # primary energy balance
         #-----------------------
-        print(temp,'temp')
-        print(self.inflow_pressure/unit.mega/unit.pascal,'pressure')
+        #print(temp,'temp')
         print('time',time)
         water_out = steam_table(T=temp,
                             P=self.inflow_pressure/unit.mega/unit.pascal)
@@ -269,14 +269,17 @@ class CoolingTower(Module):
         temp_avg = (temp+self.inflow_temp)/2
         water_avg = steam_table(T=temp_avg,
                             P=self.inflow_pressure/unit.mega/unit.pascal)
-        hvap = 2256.4+ (2500.9-2256.4)*(temp_avg/100)
-        
+        # hvap = 2256.4+ (2500.9-2256.4)*(temp_avg-273)/100
+        hvap = 2400
         
         assert water_in.phase != 'Vapour'
 
-        cp_in = water_in.Liquid.cp*unit.kj/unit.kg/unit.K
-        cp_out = water_out.Liquid.cp*unit.kj/unit.kg/unit.K
+        #cp_in = water_in.Liquid.cp*unit.kj/unit.kg/unit.K
+        #cp_out = water_out.Liquid.cp*unit.kj/unit.kg/unit.K
+        cp_in = 4.18
+        cp_out = 4.18
         cp_avg = water_avg.Liquid.cp*unit.kj/unit.kg/unit.K
+        print(cp_avg)
         rho_avg = water_avg.rho
         vol = self.volume
         
@@ -287,7 +290,8 @@ class CoolingTower(Module):
         #-----------------------
         # calculations
         #-----------------------
-
-        f_tmp[0] = - 1/(tau*cp_avg) * (temp_in*(cp_in+.0018*(cp_out*temp-hvap)) - temp*(cp_out+.0018*(cp_out*temp-hvap)))
-        f_tmp[1] = self.inflow_mass_flowrate - flowrate - self.inflow_mass_flowrate*.0018*(temp_in-temp)
+        evap_term = .002*(temp_in-self.t_ideal)
+        # evap_term = 0
+        f_tmp[0] = 1/(tau*cp_avg) * (cp_in*temp_in - cp_out*temp + evap_term*(cp_out*temp-hvap))
+        f_tmp[1] = self.inflow_mass_flowrate - flowrate - self.inflow_mass_flowrate*evap_term
         return f_tmp

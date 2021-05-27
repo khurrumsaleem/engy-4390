@@ -6,6 +6,7 @@
 
 from scipy.constants import *
 second = 1.0
+gram = 1.0
 kg = kilo*gram
 meter = 1.0
 joule = 1.0
