@@ -1,7 +1,7 @@
 # Engy-4390 Nuclear Systems Design and Analysis 
 
-[![NBViewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](http://nbviewer.jupyter.org/github/dpploy/engy-4390/tree/main)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dpploy/engy-4390/main)
+[![NBViewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](http://nbviewer.jupyter.org/github/dpploy/ct-490/tree/main)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dpploy/ct-490/main)
 
    + [University of Massachusetts Lowell](https://www.uml.edu/), Fall 2024
    + [Dept. of Chemical Engineering](https://www.uml.edu/Engineering/Chemical/) (Nuclear Program)
@@ -12,7 +12,7 @@ The goal of this course is to offer students an opportunity to exercise concepts
 previous courses in the form of a project. Groups of two (or three) students will select a topic for design and 
 analysis of nuclear systems. Past projects are kept here as an example for possibilities of future projects.
 
-Although the project topics are flexible, the past ones have close ties to balance of plant and to the content taught in a related course [Engy-4350](https://github.com/dpploy/engy-4350).
+Although the project topics are flexible, the past ones have close ties to balance of plant and to the content taught in a related course [CT-410](https://github.com/dpploy/ct-410).
 
 Feedback and collaboration to improve this course are welcome through GitHub `pull requests` and `issues` or direct email.
 
@@ -28,10 +28,24 @@ start a Jupyter Notebook server on your web browser with all notebooks listed. U
 clicking on individual notebook files, you will access the live course notebooks.
 + Use the green `download` button above on the right upper side of the page and download a ZIP archive to your local machine. Unzip the archive. Then use your own Jupyter Notebook server to navigate to the directory created by the unzip operation and upload the notebook files. In this case the files will not be updated and you will need to return to the repository for getting new files or updated versions of previously downloaded files.
 
-> *Students will profit from either taking or self-studying a [companion course](https://github.com/dpploy/chen-3170) 
+> *[Pre-requisite course: CT-410](https://github.com/dpploy.com/ct-410).
+
+> *Students will profit from either taking or self-studying a [companion course](https://github.com/dpploy/ct-300) 
 > that explains many of the computational aspects of using Jupyter notebooks, Python language programming, and methods 
 > in computational engineering.*
 
 Thanks in advance for inputs to improve this course.\
 Regards,\
 Prof. Valmor F. de Almeida
+
+## Usage
+   + Download
+   + `uv sync`
+   + `uv run jupyter notebook`
+
+## History
+This training material was developed and used as the catalog course 
+Engy-4390 (Fall 2019, 2020, 2023, 2024) by Dr. Valmor 
+F. de Almeida while teaching as an associate professor of nuclear chemical engineering at 
+UMass Lowell USA. This is now offered as training and certification at 
+[Cortix Tech](https://cortix.tech).
