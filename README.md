@@ -1,11 +1,12 @@
-# Engy-4390 Nuclear Systems Design and Analysis 
+# CT-490 Nuclear Systems Design and Analysis in Chemical Engineering 
 
 [![NBViewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](http://nbviewer.jupyter.org/github/dpploy/ct-490/tree/main)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dpploy/ct-490/main)
+![Website](https://img.shields.io/website/https/github.com/dpploy/ct-490.svg)
+[![Size](https://img.shields.io/github/repo-size/dpploy/ct-490.svg?label=size&style=flat)](https://github.com/dpploy/ct-490)
 
-   + [University of Massachusetts Lowell](https://www.uml.edu/), Fall 2024
-   + [Dept. of Chemical Engineering](https://www.uml.edu/Engineering/Chemical/) (Nuclear Program)
-   + [Prof. Valmor F. de Almeida](https://www.uml.edu/Engineering/Chemical/faculty/de-Almeida-Valmor.aspx) (valmor_dealmeida@uml.edu)
+   + [Cortix Tech](https://cortix.tech/), Training & Certification
+   + Licensed under the Cortix Tech Courseware & Sample Code License (CT-CSL) v1.0 — see LICENSE.
 
 |   |  |
 |:--:|:--:|
