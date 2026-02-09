@@ -1,12 +1,17 @@
-# Engy-4390 Nuclear Systems Design and Analysis 
+# CT-490 Nuclear Systems Design and Analysis in Chemical Engineering 
 
 [![NBViewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](http://nbviewer.jupyter.org/github/dpploy/ct-490/tree/main)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dpploy/ct-490/main)
+![Website](https://img.shields.io/website/https/github.com/dpploy/ct-490.svg)
+[![Size](https://img.shields.io/github/repo-size/dpploy/ct-490.svg?label=size&style=flat)](https://github.com/dpploy/ct-490)
 
-   + [University of Massachusetts Lowell](https://www.uml.edu/), Fall 2024
-   + [Dept. of Chemical Engineering](https://www.uml.edu/Engineering/Chemical/) (Nuclear Program)
-   + [Prof. Valmor F. de Almeida](https://www.uml.edu/Engineering/Chemical/faculty/de-Almeida-Valmor.aspx) (valmor_dealmeida@uml.edu)
+   + [Cortix Tech](https://cortix.tech/), Training & Certification
+   + Licensed under the Cortix Tech Courseware & Sample Code License (CT-CSL) v1.0 — see LICENSE.
 
+|   |  |
+|:--:|:--:|
+| <img width="250" src="projects/2024/fires-brick/pics/domain.png" title="Domain"> | <img width="650" src="projects/2024/fires-brick/pics/results.png" title="Brick Heating"> |
+| <img width="250" src="projects/2024/heated-plate/pics/domain.png" title="Domain"> | <img width="650" src="projects/2024/heated-plate/pics/results.png" title="Heating"> |
 
 The goal of this course is to offer students an opportunity to exercise concepts learned in
 previous courses in the form of a project. Groups of two (or three) students will select a topic for design and 
