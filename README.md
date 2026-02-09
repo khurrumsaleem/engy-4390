@@ -41,7 +41,7 @@ clicking on individual notebook files, you will access the live course notebooks
 
 Thanks in advance for inputs to improve this course.\
 Regards,\
-Prof. Valmor F. de Almeida
+Dr. Valmor F. de Almeida
 
 ## Usage
    + Download
