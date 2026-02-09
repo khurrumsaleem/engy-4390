@@ -27,7 +27,7 @@ Finite Element method.
 | <img width="900" src="pics/results.png" title="My result"> |
 | <p style="text-align:center;"><b>No-flux Neumann boundary conditions on the left with a heat source in the left plate and an equivalent heat sink in the fluid channel with a Robin boundary condition on the far right.</b></p> |
 
-This Semester I have spent my time improving the projects technical aspects clarifying the data presented and creating a comparison to gold standard provided by Professor Walmor de Almeida. The past groups didn't have this data and with this data future groups will be able to model potentially more tests with different boundary conditions and understanding how they can check their work after they're done. 
+This Semester I have spent my time improving the projects technical aspects clarifying the data presented and creating a comparison to gold standard provided by Professor Valmor de Almeida. The past groups didn't have this data and with this data future groups will be able to model potentially more tests with different boundary conditions and understanding how they can check their work after they're done. 
 
 References:
 
