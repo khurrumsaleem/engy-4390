@@ -9,7 +9,7 @@
 
 |   |  |
 |:--:|:--:|
-| <img width="350" src="projects/2024/fires-brick/pics/domain.png" title="Domain"> | <img width="550" src="projects/2024/fires-brick/pics/results.png" title="Brick Heating"> |
+| <img width="250" src="projects/2024/fires-brick/pics/domain.png" title="Domain"> | <img width="650" src="projects/2024/fires-brick/pics/results.png" title="Brick Heating"> |
 
 The goal of this course is to offer students an opportunity to exercise concepts learned in
 previous courses in the form of a project. Groups of two (or three) students will select a topic for design and 
